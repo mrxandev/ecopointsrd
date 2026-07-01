@@ -9,6 +9,8 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 
+import { AppTopBarTitle } from "@/components/navigation/app-top-bar-title";
+import { MissionBackButton } from "@/components/navigation/mission-back-button";
 import { AuthProvider } from "@/context/auth-context";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -40,6 +42,7 @@ function RootNavigator() {
     const isAuthRoute = routeGroup === "(auth)";
     const isAgentRoute = routeGroup === "(agent)";
     const isUserRoute = routeGroup === "(tabs)";
+    const isMissionRoute = routeGroup === "mission";
 
     if (!isAuthenticated) {
       if (!isAuthRoute) {
@@ -49,7 +52,7 @@ function RootNavigator() {
       return;
     }
 
-    if (role === "USER" && !isUserRoute) {
+    if (role === "USER" && !isUserRoute && !isMissionRoute) {
       router.replace("/");
       return;
     }
@@ -74,6 +77,16 @@ function RootNavigator() {
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="(agent)" />
+      <Stack.Screen
+        name="mission/[id]"
+        options={{
+          headerShown: true,
+          headerTitle: () => <AppTopBarTitle />,
+          headerTitleAlign: "center",
+          headerLeft: () => <MissionBackButton />,
+          headerShadowVisible: true,
+        }}
+      />
     </Stack>
   );
 }

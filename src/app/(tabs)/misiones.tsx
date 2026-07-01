@@ -1,5 +1,5 @@
-import { EmptyTabScreen } from "@/components/tabs/empty-tab-screen";
+import { MissionsScreen } from "@/screens/missions/missions-screen";
 
 export default function MisionesScreen() {
-  return <EmptyTabScreen label="Misiones" />;
+  return <MissionsScreen />;
 }

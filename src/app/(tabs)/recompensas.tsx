@@ -1,5 +1,5 @@
-import { EmptyTabScreen } from "@/components/tabs/empty-tab-screen";
+import { RewardsScreen } from "@/screens/rewards/rewards-screen";
 
 export default function RecompensasScreen() {
-  return <EmptyTabScreen label="Recompensas" />;
+  return <RewardsScreen />;
 }
