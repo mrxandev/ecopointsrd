@@ -1,5 +1,5 @@
-import { EmptyTabScreen } from "@/components/tabs/empty-tab-screen";
+import { ProfileScreen } from "@/screens/profile/profile-screen";
 
 export default function PerfilScreen() {
-  return <EmptyTabScreen label="Perfil" />;
+  return <ProfileScreen />;
 }

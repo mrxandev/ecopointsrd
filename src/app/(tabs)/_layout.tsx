@@ -2,17 +2,19 @@ import { Tabs } from "expo-router";
 import type { ComponentProps } from "react";
 import { type ColorValue, View, useColorScheme } from "react-native";
 
+import { AppTopBarTitle } from "@/components/navigation/app-top-bar-title";
+
 type TabIconName = "home" | "map" | "missions" | "rewards" | "profile";
 
 const ACTIVE_COLOR = "#28734f";
 const INACTIVE_COLOR = "#34424a";
 const BAR_BORDER = "#d7dde0";
 
-const TAB_ITEMS: Array<{
+const TAB_ITEMS: {
   name: string;
   title: string;
   icon: TabIconName;
-}> = [
+}[] = [
   { name: "index", title: "Inicio", icon: "home" },
   { name: "mapa", title: "Mapa", icon: "map" },
   { name: "misiones", title: "Misiones", icon: "missions" },
@@ -27,7 +29,14 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        headerTitle: () => <AppTopBarTitle />,
+        headerTitleAlign: "center",
+        headerShadowVisible: true,
+        headerStyle: {
+          backgroundColor: isDark ? "#111816" : "#ffffff",
+        },
+        headerLeft: () => null,
         tabBarActiveTintColor: ACTIVE_COLOR,
         tabBarInactiveTintColor: isDark ? "#d7dde0" : INACTIVE_COLOR,
         tabBarLabelStyle: {
