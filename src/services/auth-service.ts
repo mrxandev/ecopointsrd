@@ -16,6 +16,14 @@ export type LoginResponse = {
   token: string;
 };
 
+export type RegisterPayload = {
+  cedula: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+};
+
 type BackendLoginResponse =
   | LoginResponse
   | {
@@ -79,6 +87,32 @@ function normalizeLoginResponse(data: BackendLoginResponse | null): LoginRespons
   return null;
 }
 
+export async function registerRequest(payload: RegisterPayload) {
+  let response: Response;
+
+  try {
+    response = await fetch(buildApiUrl("/api/auth/register"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    throw new Error("Servidor no disponible. Intenta de nuevo en unos minutos.");
+  }
+
+  const data = (await response.json().catch(() => null)) as
+    | { message?: string; data?: { user?: AuthUser } }
+    | null;
+
+  if (!response.ok) {
+    throw new Error(getErrorMessage(data));
+  }
+
+  return data?.data?.user ?? null;
+}
+
 export async function loginRequest(email: string, password: string) {
   let response: Response;
 
@@ -107,4 +141,36 @@ export async function loginRequest(email: string, password: string) {
   }
 
   return loginData;
+}
+
+export async function changePasswordRequest(
+  token: string,
+  currentPassword: string,
+  newPassword: string,
+) {
+  let response: Response;
+
+  try {
+    response = await fetch(buildApiUrl("/api/auth/change-password"), {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        current_password: currentPassword,
+        new_password: newPassword,
+      }),
+    });
+  } catch {
+    throw new Error("Servidor no disponible. Intenta de nuevo en unos minutos.");
+  }
+
+  const data = (await response.json().catch(() => null)) as { message?: string } | null;
+
+  if (!response.ok) {
+    throw new Error(getErrorMessage(data));
+  }
+
+  return data?.message ?? "Contrasena actualizada correctamente.";
 }

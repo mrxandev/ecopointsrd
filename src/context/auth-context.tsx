@@ -8,7 +8,13 @@ import {
   useState,
 } from "react";
 
-import { type AuthUser, loginRequest, type UserRole } from "@/services/auth-service";
+import {
+  type AuthUser,
+  loginRequest,
+  registerRequest,
+  type RegisterPayload,
+  type UserRole,
+} from "@/services/auth-service";
 
 type AuthContextValue = {
   user: AuthUser | null;
@@ -17,6 +23,7 @@ type AuthContextValue = {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (payload: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
   restoreSession: () => Promise<void>;
 };
@@ -77,6 +84,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setUser(data.user);
   }, []);
 
+  const register = useCallback(
+    async (payload: RegisterPayload) => {
+      await registerRequest(payload);
+      await login(payload.email, payload.password);
+    },
+    [login],
+  );
+
   const logout = useCallback(async () => {
     await AsyncStorage.multiRemove([AUTH_TOKEN_KEY, AUTH_USER_KEY]);
     setToken(null);
@@ -91,10 +106,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
       isLoading,
       isAuthenticated: Boolean(token && user),
       login,
+      register,
       logout,
       restoreSession,
     }),
-    [isLoading, login, logout, restoreSession, token, user],
+    [isLoading, login, logout, register, restoreSession, token, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -332,6 +332,9 @@ export function ProfileScreen() {
             <Link href="/recompensas" asChild>
               <MenuRow label="Recompensas" icon="R" />
             </Link>
+            <Link href="/change-password" asChild>
+              <MenuRow label="Cambiar contrasena" icon="C" />
+            </Link>
             <MenuRow label="Historial de puntos" icon="H" />
             <MenuRow label="Privacidad" icon="P" />
             <MenuRow label="Cerrar sesion" icon="S" danger onPress={logout} />

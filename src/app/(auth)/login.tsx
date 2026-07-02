@@ -1,3 +1,4 @@
+import { Link } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -142,6 +143,17 @@ export default function LoginScreen() {
           </Text>
         )}
       </Pressable>
+
+      <Link href="/register" asChild>
+        <Pressable
+          accessibilityRole="button"
+          style={{ minHeight: 42, alignItems: "center", justifyContent: "center" }}
+        >
+          <Text style={{ color: "#28734f", fontSize: 14, fontWeight: "800" }}>
+            Crear cuenta
+          </Text>
+        </Pressable>
+      </Link>
     </ScrollView>
   );
 }

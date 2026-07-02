@@ -43,6 +43,7 @@ function RootNavigator() {
     const isAgentRoute = routeGroup === "(agent)";
     const isUserRoute = routeGroup === "(tabs)";
     const isMissionRoute = routeGroup === "mission";
+    const isChangePasswordRoute = routeGroup === "change-password";
 
     if (!isAuthenticated) {
       if (!isAuthRoute) {
@@ -52,12 +53,12 @@ function RootNavigator() {
       return;
     }
 
-    if (role === "USER" && !isUserRoute && !isMissionRoute) {
+    if (role === "USER" && !isUserRoute && !isMissionRoute && !isChangePasswordRoute) {
       router.replace("/");
       return;
     }
 
-    if ((role === "AGENT" || role === "ADMIN") && !isAgentRoute) {
+    if ((role === "AGENT" || role === "ADMIN") && !isAgentRoute && !isChangePasswordRoute) {
       router.replace("/validar");
     }
   }, [isAuthenticated, isLoading, role, router, segments]);
@@ -77,6 +78,16 @@ function RootNavigator() {
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="(agent)" />
+      <Stack.Screen
+        name="change-password"
+        options={{
+          headerShown: true,
+          headerTitle: () => <AppTopBarTitle />,
+          headerTitleAlign: "center",
+          headerLeft: () => <MissionBackButton />,
+          headerShadowVisible: true,
+        }}
+      />
       <Stack.Screen
         name="mission/[id]"
         options={{
