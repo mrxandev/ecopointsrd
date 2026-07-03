@@ -1,5 +1,5 @@
-import { EmptyTabScreen } from "@/components/tabs/empty-tab-screen";
+import { RecyclingMapScreen } from "@/screens/recycling/recycling-map-screen";
 
 export default function MapaScreen() {
-  return <EmptyTabScreen label="Mapa" />;
+  return <RecyclingMapScreen />;
 }

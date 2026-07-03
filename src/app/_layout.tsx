@@ -43,6 +43,7 @@ function RootNavigator() {
     const isAgentRoute = routeGroup === "(agent)";
     const isUserRoute = routeGroup === "(tabs)";
     const isMissionRoute = routeGroup === "mission";
+    const isRecyclingCenterRoute = routeGroup === "recycling-center";
     const isChangePasswordRoute = routeGroup === "change-password";
 
     if (!isAuthenticated) {
@@ -53,7 +54,13 @@ function RootNavigator() {
       return;
     }
 
-    if (role === "USER" && !isUserRoute && !isMissionRoute && !isChangePasswordRoute) {
+    if (
+      role === "USER" &&
+      !isUserRoute &&
+      !isMissionRoute &&
+      !isRecyclingCenterRoute &&
+      !isChangePasswordRoute
+    ) {
       router.replace("/");
       return;
     }
@@ -80,6 +87,16 @@ function RootNavigator() {
       <Stack.Screen name="(agent)" />
       <Stack.Screen
         name="change-password"
+        options={{
+          headerShown: true,
+          headerTitle: () => <AppTopBarTitle />,
+          headerTitleAlign: "center",
+          headerLeft: () => <MissionBackButton />,
+          headerShadowVisible: true,
+        }}
+      />
+      <Stack.Screen
+        name="recycling-center/[id]"
         options={{
           headerShown: true,
           headerTitle: () => <AppTopBarTitle />,
