@@ -1,27 +1,26 @@
-import { Pressable, ScrollView, Text, useColorScheme, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 
 export default function ValidateScreen() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
 
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
-      style={{ flex: 1, backgroundColor: isDark ? "#101815" : "#f7f8fb" }}
+      style={{ flex: 1, backgroundColor: isDark ? "#f9f9ff" : "#f9f9ff" }}
       contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 24, gap: 18 }}
     >
       <View style={{ gap: 8 }}>
         <Text
           selectable
           style={{
-            color: isDark ? "#f3fbf6" : "#163326",
+            color: isDark ? "#f3fbf6" : "#141b2b",
             fontSize: 28,
             fontWeight: "800",
           }}
         >
           Validar
         </Text>
-        <Text selectable style={{ color: isDark ? "#c9d6cf" : "#4d6258", fontSize: 16 }}>
+        <Text selectable style={{ color: isDark ? "#c9d6cf" : "#404943", fontSize: 16 }}>
           Modulo de validacion de actividades o QR.
         </Text>
       </View>
@@ -35,7 +34,7 @@ export default function ValidateScreen() {
           borderWidth: 1,
           borderStyle: "dashed",
           borderColor: isDark ? "#3c4d45" : "#cbd8d1",
-          backgroundColor: isDark ? "#17231f" : "#ffffff",
+          backgroundColor: isDark ? "#ffffff" : "#ffffff",
           padding: 24,
           gap: 16,
         }}
@@ -43,7 +42,7 @@ export default function ValidateScreen() {
         <Text
           selectable
           style={{
-            color: isDark ? "#f3fbf6" : "#163326",
+            color: isDark ? "#f3fbf6" : "#141b2b",
             fontSize: 18,
             fontWeight: "700",
             textAlign: "center",
@@ -71,3 +70,4 @@ export default function ValidateScreen() {
     </ScrollView>
   );
 }
+

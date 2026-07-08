@@ -1,13 +1,10 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "expo-router/react-navigation";
+import { DefaultTheme, ThemeProvider } from "expo-router/react-navigation";
 import { useRouter, useSegments } from "expo-router";
 import { Stack } from "expo-router/stack";
 import * as SplashScreen from "expo-splash-screen";
+import { StatusBar as ExpoStatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { useColorScheme } from "react-native";
+import { StatusBar as NativeStatusBar } from "react-native";
 
 import { AppTopBarTitle } from "@/components/navigation/app-top-bar-title";
 import { MissionBackButton } from "@/components/navigation/mission-back-button";
@@ -17,10 +14,10 @@ import { useAuth } from "@/hooks/use-auth";
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DefaultTheme}>
+      <NativeStatusBar backgroundColor="#ffffff" barStyle="dark-content" />
+      <ExpoStatusBar style="dark" />
       <AuthProvider>
         <RootNavigator />
       </AuthProvider>
@@ -45,6 +42,7 @@ function RootNavigator() {
     const isMissionRoute = routeGroup === "mission";
     const isRecyclingCenterRoute = routeGroup === "recycling-center";
     const isChangePasswordRoute = routeGroup === "change-password";
+    const isPointHistoryRoute = routeGroup === "point-history";
 
     if (!isAuthenticated) {
       if (!isAuthRoute) {
@@ -59,7 +57,8 @@ function RootNavigator() {
       !isUserRoute &&
       !isMissionRoute &&
       !isRecyclingCenterRoute &&
-      !isChangePasswordRoute
+      !isChangePasswordRoute &&
+      !isPointHistoryRoute
     ) {
       router.replace("/");
       return;
@@ -96,6 +95,16 @@ function RootNavigator() {
         }}
       />
       <Stack.Screen
+        name="point-history"
+        options={{
+          headerShown: true,
+          headerTitle: () => <AppTopBarTitle />,
+          headerTitleAlign: "center",
+          headerLeft: () => <MissionBackButton />,
+          headerShadowVisible: true,
+        }}
+      />
+      <Stack.Screen
         name="recycling-center/[id]"
         options={{
           headerShown: true,
@@ -118,3 +127,4 @@ function RootNavigator() {
     </Stack>
   );
 }
+

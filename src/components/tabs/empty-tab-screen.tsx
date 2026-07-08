@@ -7,7 +7,7 @@ export function EmptyTabScreen({ label }: { label: string }) {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#f7f8fb",
+        backgroundColor: "#f9f9ff",
         padding: 24,
       }}
     >
@@ -15,3 +15,4 @@ export function EmptyTabScreen({ label }: { label: string }) {
     </View>
   );
 }
+

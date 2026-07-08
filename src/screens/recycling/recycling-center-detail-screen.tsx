@@ -5,7 +5,6 @@ import {
   Pressable,
   ScrollView,
   Text,
-  useColorScheme,
   View,
 } from "react-native";
 
@@ -21,8 +20,7 @@ import {
 
 export function RecyclingCenterDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
   const [center, setCenter] = useState<RecyclingCenter | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,12 +60,12 @@ export function RecyclingCenterDetailScreen() {
           flex: 1,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: isDark ? "#101815" : "#f4f7f3",
+          backgroundColor: isDark ? "#f9f9ff" : "#f9f9ff",
           gap: 12,
         }}
       >
-        <ActivityIndicator color="#28734f" />
-        <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c" }}>
+        <ActivityIndicator color="#2d6a4f" />
+        <Text selectable style={{ color: isDark ? "#b8c7bf" : "#404943" }}>
           Cargando centro...
         </Text>
       </View>
@@ -80,12 +78,12 @@ export function RecyclingCenterDetailScreen() {
         style={{
           flex: 1,
           justifyContent: "center",
-          backgroundColor: isDark ? "#101815" : "#f4f7f3",
+          backgroundColor: isDark ? "#f9f9ff" : "#f9f9ff",
           padding: 20,
           gap: 12,
         }}
       >
-        <Text selectable style={{ color: isDark ? "#f3fbf6" : "#17231f", fontWeight: "900" }}>
+        <Text selectable style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontWeight: "900" }}>
           {error ?? "No encontramos este centro."}
         </Text>
         <Pressable
@@ -96,7 +94,7 @@ export function RecyclingCenterDetailScreen() {
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 8,
-            backgroundColor: "#28734f",
+            backgroundColor: "#2d6a4f",
           }}
         >
           <Text style={{ color: "#ffffff", fontWeight: "900" }}>Reintentar</Text>
@@ -108,14 +106,14 @@ export function RecyclingCenterDetailScreen() {
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
-      style={{ flex: 1, backgroundColor: isDark ? "#101815" : "#f4f7f3" }}
+      style={{ flex: 1, backgroundColor: isDark ? "#f9f9ff" : "#f9f9ff" }}
       contentContainerStyle={{ padding: 16, paddingBottom: 92, gap: 16 }}
     >
       <View
         style={{
           minHeight: 190,
           borderRadius: 8,
-          backgroundColor: isDark ? "#123325" : "#d7f8df",
+          backgroundColor: isDark ? "#123325" : "#d8f3dc",
           padding: 18,
           justifyContent: "space-between",
         }}
@@ -124,11 +122,11 @@ export function RecyclingCenterDetailScreen() {
           <Text selectable style={{ color: isDark ? "#e7fff0" : "#166534", fontSize: 13, fontWeight: "900" }}>
             Centro activo
           </Text>
-          <Text selectable style={{ color: isDark ? "#ffffff" : "#17231f", fontSize: 28, fontWeight: "900" }}>
+          <Text selectable style={{ color: isDark ? "#ffffff" : "#141b2b", fontSize: 28, fontWeight: "900" }}>
             {center.name}
           </Text>
         </View>
-        <Text selectable style={{ color: isDark ? "#d9fbe4" : "#28734f", fontSize: 14, fontWeight: "800" }}>
+        <Text selectable style={{ color: isDark ? "#d9fbe4" : "#2d6a4f", fontSize: 14, fontWeight: "800" }}>
           {getCenterLocation(center)}
         </Text>
       </View>
@@ -146,7 +144,7 @@ export function RecyclingCenterDetailScreen() {
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 8,
-            backgroundColor: "#28734f",
+            backgroundColor: "#2d6a4f",
           }}
         >
           <Text style={{ color: "#ffffff", fontSize: 15, fontWeight: "900" }}>
@@ -159,26 +157,26 @@ export function RecyclingCenterDetailScreen() {
 }
 
 function InfoBlock({ label, value }: { label: string; value: string }) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
 
   return (
     <View
       style={{
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: isDark ? "#314139" : "#dbe4df",
-        backgroundColor: isDark ? "#17231f" : "#ffffff",
+        borderColor: isDark ? "#314139" : "#d1d5db",
+        backgroundColor: isDark ? "#ffffff" : "#ffffff",
         padding: 14,
         gap: 5,
       }}
     >
-      <Text selectable style={{ color: isDark ? "#9fb0a7" : "#63786e", fontSize: 12 }}>
+      <Text selectable style={{ color: isDark ? "#9fb0a7" : "#404943", fontSize: 12 }}>
         {label}
       </Text>
-      <Text selectable style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 15, fontWeight: "800" }}>
+      <Text selectable style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 15, fontWeight: "800" }}>
         {value}
       </Text>
     </View>
   );
 }
+

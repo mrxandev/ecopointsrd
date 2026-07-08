@@ -1,30 +1,67 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 import '@/global.css';
 
 import { Platform } from 'react-native';
 
+export const Palette = {
+  surface: '#f9f9ff',
+  surfaceDim: '#d3daef',
+  surfaceBright: '#f9f9ff',
+  surfaceContainerLowest: '#ffffff',
+  surfaceContainerLow: '#f1f3ff',
+  surfaceContainer: '#e9edff',
+  surfaceContainerHigh: '#e1e8fd',
+  surfaceContainerHighest: '#dce2f7',
+  onSurface: '#141b2b',
+  onSurfaceVariant: '#404943',
+  inverseSurface: '#293040',
+  inverseOnSurface: '#edf0ff',
+  outline: '#707973',
+  outlineVariant: '#bfc9c1',
+  surfaceTint: '#2c694e',
+  primary: '#0f5238',
+  onPrimary: '#ffffff',
+  primaryContainer: '#2d6a4f',
+  onPrimaryContainer: '#a8e7c5',
+  inversePrimary: '#95d4b3',
+  secondary: '#555f70',
+  onSecondary: '#ffffff',
+  secondaryContainer: '#d6e0f4',
+  onSecondaryContainer: '#596374',
+  tertiary: '#0f4883',
+  onTertiary: '#ffffff',
+  tertiaryContainer: '#31609c',
+  onTertiaryContainer: '#c6dbff',
+  error: '#ba1a1a',
+  onError: '#ffffff',
+  errorContainer: '#ffdad6',
+  onErrorContainer: '#93000a',
+  accentSuccess: '#52b788',
+  surfaceMint: '#d8f3dc',
+  alertWarning: '#f4a261',
+  errorRed: '#e63946',
+  placeholderGray: '#9ca3af',
+  surfaceSecondary: '#f3f4f6',
+  borderDefault: '#d1d5db',
+} as const;
+
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
-  },
-  dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    text: Palette.onSurface,
+    background: Palette.surface,
+    backgroundElement: Palette.surfaceContainerLow,
+    backgroundSelected: Palette.surfaceContainerHighest,
+    textSecondary: Palette.onSurfaceVariant,
+    tint: Palette.primaryContainer,
+    primary: Palette.primaryContainer,
+    primaryStrong: Palette.primary,
+    border: Palette.borderDefault,
+    card: Palette.surfaceContainerLowest,
+    success: Palette.accentSuccess,
+    error: Palette.error,
   },
 } as const;
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
+export type ThemeColor = keyof typeof Colors.light;
 
 export const Fonts = Platform.select({
   ios: {
@@ -63,3 +100,4 @@ export const Spacing = {
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
+

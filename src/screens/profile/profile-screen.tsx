@@ -7,20 +7,36 @@ import {
   ScrollView,
   Text,
   TextInput,
-  useColorScheme,
   View,
 } from "react-native";
 import { Image } from "expo-image";
 
 import { useAuth } from "@/hooks/use-auth";
 import {
-  getMyPointTransactions,
   getMyPoints,
   getMyProfile,
-  type PointTransaction,
   type UserProfile,
   updateMyProfile,
 } from "@/services/user-service";
+
+const palette = {
+  background: "#f9f9ff",
+  surface: "#ffffff",
+  surfaceLow: "#f1f3ff",
+  surfaceVariant: "#dce2f7",
+  text: "#141b2b",
+  textMuted: "#404943",
+  outline: "#d1d5db",
+  outlineVariant: "#bfc9c1",
+  primary: "#2d6a4f",
+  primaryDark: "#0f5238",
+  primarySoft: "#d8f3dc",
+  success: "#52b788",
+  tertiary: "#0f4883",
+  tertiarySoft: "#d4e3ff",
+  error: "#ba1a1a",
+  errorSoft: "#ffdad6",
+};
 
 type EditableProfile = Pick<
   UserProfile,
@@ -39,10 +55,8 @@ function getDisplayName(user: Pick<UserProfile, "first_name" | "last_name" | "em
 
 export function ProfileScreen() {
   const { logout, token, user } = useAuth();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [transactions, setTransactions] = useState<PointTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -76,10 +90,9 @@ export function ProfileScreen() {
       try {
         setError(null);
         setMessage(null);
-        const [nextProfile, nextPoints, nextTransactions] = await Promise.all([
+        const [nextProfile, nextPoints] = await Promise.all([
           getMyProfile(token),
           getMyPoints(token),
-          getMyPointTransactions(token),
         ]);
         const mergedProfile = {
           ...nextProfile,
@@ -90,7 +103,6 @@ export function ProfileScreen() {
         };
 
         setProfile(mergedProfile);
-        setTransactions(nextTransactions);
         setForm({
           first_name: mergedProfile.first_name ?? "",
           last_name: mergedProfile.last_name ?? "",
@@ -147,8 +159,6 @@ export function ProfileScreen() {
   );
 
   const level = Math.max(1, Math.floor(activeProfile.total_points_earned / 500) + 1);
-  const recentTransactions = transactions.slice(0, 3);
-
   async function handleSave() {
     if (!token) {
       setMessage("Inicia sesion nuevamente para actualizar tu perfil.");
@@ -184,13 +194,13 @@ export function ProfileScreen() {
       refreshControl={
         <RefreshControl refreshing={isRefreshing} onRefresh={() => void loadProfile("refresh")} />
       }
-      style={{ flex: 1, backgroundColor: isDark ? "#101815" : "#f4f7f3" }}
+      style={{ flex: 1, backgroundColor: isDark ? "#f9f9ff" : palette.background }}
       contentContainerStyle={{ padding: 16, paddingBottom: 92, gap: 14 }}
     >
       {isLoading ? (
         <View style={{ minHeight: 360, alignItems: "center", justifyContent: "center", gap: 12 }}>
-          <ActivityIndicator color="#28734f" />
-          <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c" }}>
+          <ActivityIndicator color={palette.primary} />
+          <Text selectable style={{ color: isDark ? "#b8c7bf" : "#404943" }}>
             Cargando perfil...
           </Text>
         </View>
@@ -207,16 +217,16 @@ export function ProfileScreen() {
 
       {!isLoading && !error ? (
         <>
-          <View style={{ alignItems: "center", gap: 8 }}>
+          <View style={{ alignItems: "center", gap: 7 }}>
             <View
               style={{
-                width: 82,
-                height: 82,
+                width: 74,
+                height: 74,
                 overflow: "hidden",
                 borderRadius: 999,
-                borderWidth: 4,
-                borderColor: "#28734f",
-                backgroundColor: isDark ? "#17231f" : "#ffffff",
+                borderWidth: 3,
+                borderColor: palette.primary,
+                backgroundColor: isDark ? "#ffffff" : palette.surface,
                 alignItems: "center",
                 justifyContent: "center",
               }}
@@ -228,7 +238,7 @@ export function ProfileScreen() {
                   style={{ width: "100%", height: "100%" }}
                 />
               ) : (
-                <Text style={{ color: "#28734f", fontSize: 26, fontWeight: "900" }}>
+                <Text style={{ color: palette.primary, fontSize: 24, fontWeight: "900" }}>
                   {getDisplayName(activeProfile).slice(0, 1).toUpperCase()}
                 </Text>
               )}
@@ -237,73 +247,84 @@ export function ProfileScreen() {
               <Text
                 selectable
                 style={{
-                  color: isDark ? "#f3fbf6" : "#17231f",
-                  fontSize: 20,
+                  color: isDark ? "#f3fbf6" : palette.text,
+                  fontSize: 19,
                   fontWeight: "900",
                 }}
               >
                 {getDisplayName(activeProfile)}
               </Text>
-              <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 12 }}>
+              <Text selectable style={{ color: isDark ? "#b8c7bf" : palette.textMuted, fontSize: 12 }}>
                 {[activeProfile.municipality, activeProfile.province].filter(Boolean).join(", ") ||
                   "Ubicacion sin completar"}
               </Text>
-              {activeProfile.is_verified ? (
-                <View
-                  style={{
-                    borderRadius: 999,
-                    backgroundColor: "#d7f8df",
-                    paddingHorizontal: 10,
-                    paddingVertical: 4,
-                  }}
-                >
-                  <Text style={{ color: "#166534", fontSize: 11, fontWeight: "900" }}>
-                    Guardian Verde
-                  </Text>
-                </View>
-              ) : null}
+              <View
+                style={{
+                  borderRadius: 999,
+                  backgroundColor: palette.primarySoft,
+                  paddingHorizontal: 10,
+                  paddingVertical: 4,
+                }}
+              >
+                <Text style={{ color: palette.primary, fontSize: 11, fontWeight: "900" }}>
+                  Guardian Verde
+                </Text>
+              </View>
             </View>
           </View>
 
           <View style={{ flexDirection: "row", gap: 8 }}>
             <StatCard label="Puntos" value={formatNumber(activeProfile.points)} />
-            <StatCard label="Nivel" value={String(level)} />
-            <StatCard label="Misiones" value={formatNumber(activeProfile.completed_missions)} />
+            <StatCard label="Actual" value={`Nivel ${level}`} />
+            <StatCard label="Nacional" value="#23" accent="blue" />
           </View>
 
           <View
             style={{
-              borderRadius: 8,
-              backgroundColor: "#0f6b4a",
+              borderRadius: 12,
+              backgroundColor: palette.primaryDark,
               padding: 16,
-              gap: 12,
+              gap: 11,
               overflow: "hidden",
+              boxShadow: "0 2px 8px rgba(15, 82, 56, 0.18)",
             }}
           >
-            <Text selectable style={{ color: "#ffffff", fontSize: 16, fontWeight: "900" }}>
-              Tu impacto acumulado
+            <View
+              style={{
+                position: "absolute",
+                right: -12,
+                top: -10,
+                width: 80,
+                height: 80,
+                borderRadius: 999,
+                borderWidth: 10,
+                borderColor: "rgba(168, 231, 197, 0.22)",
+              }}
+            />
+            <Text selectable style={{ color: "#ffffff", fontSize: 15, fontWeight: "900" }}>
+              Tu Impacto Acumulado
             </Text>
-            <ImpactRow label="Arboles plantados" value={formatNumber(impact.trees)} />
+            <ImpactRow label="Arboles Plantados" value={formatNumber(impact.trees)} />
             <ImpactRow label="Kg reciclados" value={formatNumber(impact.recycling)} />
-            <ImpactRow label="Horas voluntariado" value={`${formatNumber(impact.hours)}h`} />
+            <ImpactRow label="Horas Voluntariado" value={`${formatNumber(impact.hours)}h`} />
           </View>
 
           <View style={{ gap: 10 }}>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
               <Text
                 selectable
-                style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 16, fontWeight: "900" }}
+                style={{ color: isDark ? "#f3fbf6" : palette.text, fontSize: 16, fontWeight: "900" }}
               >
                 Insignias recientes
               </Text>
-              <Text selectable style={{ color: "#28734f", fontSize: 12, fontWeight: "800" }}>
-                {activeProfile.completed_missions > 0 ? "Activas" : "Por ganar"}
+              <Text selectable style={{ color: palette.primary, fontSize: 11, fontWeight: "900" }}>
+                Ver todas
               </Text>
             </View>
             <View style={{ flexDirection: "row", gap: 10 }}>
-              <Badge label="Reforestador" icon="A" active={activeProfile.completed_missions >= 1} />
-              <Badge label="Reciclador" icon="R" active={activeProfile.total_points_earned >= 200} />
-              <Badge label="Primeros pasos" icon="P" active={activeProfile.points >= 0} />
+              <Badge label="Reforestador" icon="A" active={activeProfile.completed_missions >= 1} tone="green" />
+              <Badge label="Reciclador" icon="R" active={activeProfile.total_points_earned >= 200} tone="blue" />
+              <Badge label="Primeros pasos" icon="P" active={activeProfile.points >= 0} tone="gray" />
             </View>
           </View>
 
@@ -323,39 +344,21 @@ export function ProfileScreen() {
             style={{
               borderRadius: 8,
               borderWidth: 1,
-              borderColor: isDark ? "#314139" : "#dbe4df",
-              backgroundColor: isDark ? "#17231f" : "#ffffff",
+              borderColor: isDark ? "#314139" : "#e1e8fd",
+              backgroundColor: isDark ? "#ffffff" : palette.surface,
               overflow: "hidden",
+              boxShadow: "0 2px 8px rgba(20, 27, 43, 0.06)",
             }}
           >
-            <MenuRow label="Editar perfil" icon="E" onPress={() => setIsEditing((value) => !value)} />
+            <MenuRow label="Editar perfil" icon="edit" onPress={() => setIsEditing((value) => !value)} />
             <Link href="/recompensas" asChild>
-              <MenuRow label="Recompensas" icon="R" />
+              <MenuRow label="Recompensas" icon="rewards" />
             </Link>
-            <Link href="/change-password" asChild>
-              <MenuRow label="Cambiar contrasena" icon="C" />
+            <Link href="/point-history" asChild>
+              <MenuRow label="Historial de puntos" icon="history" />
             </Link>
-            <MenuRow label="Historial de puntos" icon="H" />
-            <MenuRow label="Privacidad" icon="P" />
-            <MenuRow label="Cerrar sesion" icon="S" danger onPress={logout} />
-          </View>
-
-          <View style={{ gap: 10 }}>
-            <Text
-              selectable
-              style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 16, fontWeight: "900" }}
-            >
-              Historial reciente
-            </Text>
-            {recentTransactions.length > 0 ? (
-              recentTransactions.map((transaction) => (
-                <TransactionRow key={transaction.id} transaction={transaction} />
-              ))
-            ) : (
-              <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 13 }}>
-                Todavia no tienes movimientos de puntos.
-              </Text>
-            )}
+            <MenuRow label="Privacidad" icon="privacy" />
+            <MenuRow label="Cerrar sesion" icon="logout" danger onPress={logout} />
           </View>
         </>
       ) : null}
@@ -367,28 +370,29 @@ function formatNumber(value: number) {
   return new Intl.NumberFormat("es-DO").format(value);
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+function StatCard({ accent, label, value }: { accent?: "blue"; label: string; value: string }) {
+  const isDark = false;
+  const valueColor = accent === "blue" ? palette.tertiary : palette.primaryDark;
 
   return (
     <View
       style={{
         flex: 1,
-        minHeight: 66,
+        minHeight: 62,
         alignItems: "center",
         justifyContent: "center",
-        borderRadius: 8,
+        borderRadius: 12,
         borderWidth: 1,
-        borderColor: isDark ? "#314139" : "#dbe4df",
-        backgroundColor: isDark ? "#17231f" : "#ffffff",
+        borderColor: isDark ? "#314139" : "#e1e8fd",
+        backgroundColor: isDark ? "#ffffff" : palette.surface,
         gap: 4,
+        boxShadow: "0 2px 8px rgba(20, 27, 43, 0.06)",
       }}
     >
-      <Text selectable style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 17, fontWeight: "900" }}>
+      <Text selectable style={{ color: isDark ? "#f3fbf6" : valueColor, fontSize: 16, fontWeight: "900" }}>
         {value}
       </Text>
-      <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 11 }}>
+      <Text selectable style={{ color: isDark ? "#b8c7bf" : palette.textMuted, fontSize: 11 }}>
         {label}
       </Text>
     </View>
@@ -408,9 +412,21 @@ function ImpactRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Badge({ active, icon, label }: { active: boolean; icon: string; label: string }) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+function Badge({
+  active,
+  icon,
+  label,
+  tone,
+}: {
+  active: boolean;
+  icon: string;
+  label: string;
+  tone: "blue" | "gray" | "green";
+}) {
+  const isDark = false;
+  const activeBackground =
+    tone === "green" ? palette.primarySoft : tone === "blue" ? palette.tertiarySoft : palette.surfaceVariant;
+  const activeColor = tone === "blue" ? palette.tertiary : palette.primary;
 
   return (
     <View style={{ flex: 1, alignItems: "center", gap: 6, opacity: active ? 1 : 0.5 }}>
@@ -421,19 +437,21 @@ function Badge({ active, icon, label }: { active: boolean; icon: string; label: 
           alignItems: "center",
           justifyContent: "center",
           borderRadius: 999,
-          backgroundColor: active ? "#d7f8df" : isDark ? "#17231f" : "#edf3ef",
+          borderWidth: 1,
+          borderColor: active ? palette.outlineVariant : "transparent",
+          backgroundColor: active ? activeBackground : isDark ? "#ffffff" : palette.surfaceLow,
         }}
       >
-        <Text style={{ color: active ? "#28734f" : "#7b8982", fontSize: 18, fontWeight: "900" }}>
+        <Text style={{ color: active ? activeColor : "#7b8982", fontSize: 18, fontWeight: "900" }}>
           {icon}
         </Text>
       </View>
       <Text
         selectable
         style={{
-          color: isDark ? "#dce8e1" : "#34483e",
+          color: isDark ? "#dce8e1" : palette.text,
           fontSize: 11,
-          fontWeight: "800",
+          fontWeight: "700",
           textAlign: "center",
         }}
       >
@@ -450,12 +468,11 @@ function MenuRow({
   onPress,
 }: {
   danger?: boolean;
-  icon: string;
+  icon: MenuIconName;
   label: string;
   onPress?: () => void;
 }) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
 
   return (
     <Pressable
@@ -466,26 +483,156 @@ function MenuRow({
         flexDirection: "row",
         alignItems: "center",
         borderBottomWidth: 1,
-        borderBottomColor: isDark ? "#26332f" : "#edf3ef",
+        borderBottomColor: isDark ? "#26332f" : "#e9edff",
         paddingHorizontal: 14,
         gap: 12,
       }}
     >
-      <Text style={{ color: danger ? "#c2410c" : "#28734f", width: 18, fontWeight: "900" }}>
-        {icon}
-      </Text>
+      <MenuIcon color={danger ? palette.error : palette.primaryDark} name={icon} />
       <Text
         style={{
           flex: 1,
-          color: danger ? "#c2410c" : isDark ? "#f3fbf6" : "#17231f",
+          color: danger ? palette.error : isDark ? "#f3fbf6" : palette.text,
           fontSize: 14,
-          fontWeight: "700",
+          fontWeight: "600",
         }}
       >
         {label}
       </Text>
-      {!danger ? <Text style={{ color: isDark ? "#9fb0a7" : "#63786e" }}>{">"}</Text> : null}
+      {!danger ? <Text style={{ color: isDark ? "#9fb0a7" : "#404943" }}>{">"}</Text> : null}
     </Pressable>
+  );
+}
+
+type MenuIconName = "edit" | "history" | "logout" | "privacy" | "rewards";
+
+function MenuIcon({ color, name }: { color: string; name: MenuIconName }) {
+  const stroke = { borderColor: color };
+
+  if (name === "edit") {
+    return (
+      <View style={{ width: 18, height: 18, alignItems: "center", justifyContent: "center" }}>
+        <View
+          style={{
+            width: 13,
+            height: 4,
+            borderWidth: 1.6,
+            borderRadius: 2,
+            transform: [{ rotate: "-42deg" }],
+            ...stroke,
+          }}
+        />
+        <View
+          style={{
+            position: "absolute",
+            right: 2,
+            top: 2,
+            width: 4,
+            height: 4,
+            borderTopWidth: 1.6,
+            borderRightWidth: 1.6,
+            transform: [{ rotate: "-42deg" }],
+            ...stroke,
+          }}
+        />
+      </View>
+    );
+  }
+
+  if (name === "rewards") {
+    return (
+      <View style={{ width: 18, height: 18, alignItems: "center", justifyContent: "center" }}>
+        <View style={{ position: "absolute", top: 3, flexDirection: "row", gap: 1 }}>
+          <View style={{ width: 5, height: 5, borderWidth: 1.5, borderRadius: 99, ...stroke }} />
+          <View style={{ width: 5, height: 5, borderWidth: 1.5, borderRadius: 99, ...stroke }} />
+        </View>
+        <View style={{ width: 15, height: 5, borderWidth: 1.5, borderRadius: 2, ...stroke }} />
+        <View style={{ width: 13, height: 8, borderWidth: 1.5, borderTopWidth: 0, ...stroke }} />
+        <View style={{ position: "absolute", bottom: 3, width: 1.5, height: 12, backgroundColor: color }} />
+      </View>
+    );
+  }
+
+  if (name === "history") {
+    return (
+      <View style={{ width: 18, height: 18, alignItems: "center", justifyContent: "center" }}>
+        <View style={{ width: 13, height: 13, borderWidth: 1.6, borderRadius: 99, ...stroke }} />
+        <View
+          style={{
+            position: "absolute",
+            left: 1,
+            top: 4,
+            width: 5,
+            height: 5,
+            borderLeftWidth: 1.6,
+            borderTopWidth: 1.6,
+            transform: [{ rotate: "-35deg" }],
+            ...stroke,
+          }}
+        />
+        <View style={{ position: "absolute", width: 1.5, height: 5, backgroundColor: color }} />
+        <View
+          style={{
+            position: "absolute",
+            width: 5,
+            height: 1.5,
+            backgroundColor: color,
+            transform: [{ translateX: 2 }, { translateY: 2 }],
+          }}
+        />
+      </View>
+    );
+  }
+
+  if (name === "privacy") {
+    return (
+      <View style={{ width: 18, height: 18, alignItems: "center", justifyContent: "center" }}>
+        <View
+          style={{
+            width: 12,
+            height: 14,
+            borderWidth: 1.6,
+            borderTopLeftRadius: 6,
+            borderTopRightRadius: 6,
+            borderBottomLeftRadius: 5,
+            borderBottomRightRadius: 5,
+            ...stroke,
+          }}
+        />
+        <View style={{ position: "absolute", top: 6, width: 3, height: 3, borderRadius: 99, backgroundColor: color }} />
+        <View style={{ position: "absolute", top: 9, width: 1.5, height: 4, backgroundColor: color }} />
+      </View>
+    );
+  }
+
+  return (
+    <View style={{ width: 18, height: 18, justifyContent: "center" }}>
+      <View
+        style={{
+          width: 10,
+          height: 12,
+          borderLeftWidth: 1.6,
+          borderTopWidth: 1.6,
+          borderBottomWidth: 1.6,
+          borderTopLeftRadius: 2,
+          borderBottomLeftRadius: 2,
+          ...stroke,
+        }}
+      />
+      <View style={{ position: "absolute", left: 6, width: 8, height: 1.6, backgroundColor: color }} />
+      <View
+        style={{
+          position: "absolute",
+          right: 1,
+          width: 6,
+          height: 6,
+          borderTopWidth: 1.6,
+          borderRightWidth: 1.6,
+          transform: [{ rotate: "45deg" }],
+          ...stroke,
+        }}
+      />
+    </View>
   );
 }
 
@@ -521,10 +668,10 @@ function EditProfileForm({
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 8,
-            backgroundColor: "#edf3ef",
+            backgroundColor: "#f1f3ff",
           }}
         >
-          <Text style={{ color: "#34483e", fontWeight: "900" }}>Cancelar</Text>
+          <Text style={{ color: palette.textMuted, fontWeight: "900" }}>Cancelar</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -536,7 +683,7 @@ function EditProfileForm({
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 8,
-            backgroundColor: isSaving ? "#90a79b" : "#28734f",
+            backgroundColor: isSaving ? "#90a79b" : palette.primary,
           }}
         >
           {isSaving ? (
@@ -559,12 +706,11 @@ function EditableInput({
   onChangeText: (value: string) => void;
   value: string;
 }) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
 
   return (
     <View style={{ gap: 5 }}>
-      <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 12 }}>
+      <Text selectable style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 12 }}>
         {label}
       </Text>
       <TextInput
@@ -573,9 +719,9 @@ function EditableInput({
           minHeight: 46,
           borderRadius: 8,
           borderWidth: 1,
-          borderColor: isDark ? "#314139" : "#d4ddd8",
-          backgroundColor: isDark ? "#17231f" : "#ffffff",
-          color: isDark ? "#ffffff" : "#17231f",
+          borderColor: isDark ? "#314139" : palette.outline,
+          backgroundColor: isDark ? "#ffffff" : palette.surface,
+          color: isDark ? "#ffffff" : palette.text,
           paddingHorizontal: 12,
           fontSize: 14,
         }}
@@ -585,55 +731,16 @@ function EditableInput({
   );
 }
 
-function TransactionRow({ transaction }: { transaction: PointTransaction }) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-  const isPositive = transaction.transaction_type !== "REDEEMED" && transaction.transaction_type !== "PENALTY";
-
-  return (
-    <View
-      style={{
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: isDark ? "#314139" : "#dbe4df",
-        backgroundColor: isDark ? "#17231f" : "#ffffff",
-        padding: 12,
-        gap: 4,
-      }}
-    >
-      <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
-        <Text
-          selectable
-          numberOfLines={1}
-          style={{ flex: 1, color: isDark ? "#f3fbf6" : "#17231f", fontWeight: "800" }}
-        >
-          {transaction.description}
-        </Text>
-        <Text
-          selectable
-          style={{ color: isPositive ? "#28734f" : "#c2410c", fontWeight: "900" }}
-        >
-          {isPositive ? "+" : "-"}
-          {formatNumber(transaction.points)}
-        </Text>
-      </View>
-      <Text selectable style={{ color: isDark ? "#9fb0a7" : "#63786e", fontSize: 12 }}>
-        {transaction.transaction_type}
-      </Text>
-    </View>
-  );
-}
-
 function InlineMessage({ message, success }: { message: string; success: boolean }) {
   return (
     <View
       style={{
         borderRadius: 8,
-        backgroundColor: success ? "#d7f8df" : "#fff0ee",
+        backgroundColor: success ? palette.primarySoft : palette.errorSoft,
         padding: 12,
       }}
     >
-      <Text selectable style={{ color: success ? "#166534" : "#8c1d18", fontWeight: "800" }}>
+      <Text selectable style={{ color: success ? palette.primaryDark : palette.error, fontWeight: "800" }}>
         {message}
       </Text>
     </View>
@@ -656,13 +763,13 @@ function StateCard({
       style={{
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: danger ? "#f2b8b5" : "#dbe4df",
-        backgroundColor: danger ? "#fff0ee" : "#ffffff",
+        borderColor: danger ? "#f2b8b5" : "#e1e8fd",
+        backgroundColor: danger ? "#ffdad6" : palette.surface,
         padding: 16,
         gap: 12,
       }}
     >
-      <Text selectable style={{ color: danger ? "#8c1d18" : "#17231f", fontWeight: "800" }}>
+      <Text selectable style={{ color: danger ? "#93000a" : palette.text, fontWeight: "800" }}>
         {title}
       </Text>
       <Pressable
@@ -673,7 +780,7 @@ function StateCard({
           alignItems: "center",
           justifyContent: "center",
           borderRadius: 8,
-          backgroundColor: "#28734f",
+          backgroundColor: palette.primary,
         }}
       >
         <Text style={{ color: "#ffffff", fontWeight: "900" }}>{actionLabel}</Text>
@@ -681,3 +788,4 @@ function StateCard({
     </View>
   );
 }
+

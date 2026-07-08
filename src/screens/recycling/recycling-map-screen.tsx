@@ -8,7 +8,6 @@ import {
   ScrollView,
   Text,
   TextInput,
-  useColorScheme,
   View,
 } from "react-native";
 
@@ -17,8 +16,7 @@ import { CentersMap } from "../../components/recycling/centers-map";
 import { getCenterLocation, hasCoordinates } from "./recycling-utils";
 
 export function RecyclingMapScreen() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
   const scrollViewRef = useRef<ScrollViewType>(null);
   const [centers, setCenters] = useState<RecyclingCenter[]>([]);
   const [query, setQuery] = useState("");
@@ -91,17 +89,17 @@ export function RecyclingMapScreen() {
         <RefreshControl refreshing={isRefreshing} onRefresh={() => void loadCenters("refresh")} />
       }
       scrollEnabled={!isMapTouching}
-      style={{ flex: 1, backgroundColor: isDark ? "#101815" : "#f4f7f3" }}
+      style={{ flex: 1, backgroundColor: isDark ? "#f9f9ff" : "#f9f9ff" }}
       contentContainerStyle={{ padding: 16, paddingBottom: 92, gap: 16 }}
     >
       <View style={{ gap: 4 }}>
         <Text
           selectable
-          style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 28, fontWeight: "900" }}
+          style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 28, fontWeight: "900" }}
         >
           Centros de reciclaje
         </Text>
-        <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 14 }}>
+        <Text selectable style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 14 }}>
           Encuentra puntos activos para llevar materiales reciclables.
         </Text>
       </View>
@@ -115,9 +113,9 @@ export function RecyclingMapScreen() {
           minHeight: 48,
           borderRadius: 8,
           borderWidth: 1,
-          borderColor: isDark ? "#314139" : "#d4ddd8",
-          backgroundColor: isDark ? "#17231f" : "#ffffff",
-          color: isDark ? "#ffffff" : "#17231f",
+          borderColor: isDark ? "#314139" : "#d1d5db",
+          backgroundColor: isDark ? "#ffffff" : "#ffffff",
+          color: isDark ? "#ffffff" : "#141b2b",
           paddingHorizontal: 14,
           fontSize: 14,
         }}
@@ -132,9 +130,9 @@ export function RecyclingMapScreen() {
           height: 280,
           overflow: "hidden",
           borderRadius: 8,
-          backgroundColor: isDark ? "#17231f" : "#ffffff",
+          backgroundColor: isDark ? "#ffffff" : "#ffffff",
           borderWidth: 1,
-          borderColor: isDark ? "#314139" : "#dbe4df",
+          borderColor: isDark ? "#314139" : "#d1d5db",
         }}
       >
         <CentersMap centers={centersWithCoords} focusedCenterId={focusedCenterId} />
@@ -161,8 +159,8 @@ export function RecyclingMapScreen() {
 
       {isLoading ? (
         <View style={{ minHeight: 220, alignItems: "center", justifyContent: "center", gap: 12 }}>
-          <ActivityIndicator color="#28734f" />
-          <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c" }}>
+          <ActivityIndicator color="#2d6a4f" />
+          <Text selectable style={{ color: isDark ? "#b8c7bf" : "#404943" }}>
             Cargando centros...
           </Text>
         </View>
@@ -172,12 +170,12 @@ export function RecyclingMapScreen() {
         <View
           style={{
             borderRadius: 8,
-            backgroundColor: isDark ? "#351d1b" : "#fff0ee",
+            backgroundColor: isDark ? "#351d1b" : "#ffdad6",
             padding: 14,
             gap: 12,
           }}
         >
-          <Text selectable style={{ color: isDark ? "#ffd9d6" : "#8c1d18", fontWeight: "800" }}>
+          <Text selectable style={{ color: isDark ? "#ffd9d6" : "#93000a", fontWeight: "800" }}>
             {error}
           </Text>
           <Pressable
@@ -188,7 +186,7 @@ export function RecyclingMapScreen() {
               alignItems: "center",
               justifyContent: "center",
               borderRadius: 8,
-              backgroundColor: "#28734f",
+              backgroundColor: "#2d6a4f",
             }}
           >
             <Text style={{ color: "#ffffff", fontWeight: "900" }}>Reintentar</Text>
@@ -200,7 +198,7 @@ export function RecyclingMapScreen() {
         <View style={{ gap: 10 }}>
           <Text
             selectable
-            style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 16, fontWeight: "900" }}
+            style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 16, fontWeight: "900" }}
           >
             {filteredCenters.length} centros encontrados
           </Text>
@@ -217,11 +215,11 @@ export function RecyclingMapScreen() {
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 8,
-            backgroundColor: isDark ? "#17231f" : "#ffffff",
+            backgroundColor: isDark ? "#ffffff" : "#ffffff",
             padding: 20,
           }}
         >
-          <Text selectable style={{ color: isDark ? "#f3fbf6" : "#17231f", fontWeight: "900" }}>
+          <Text selectable style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontWeight: "900" }}>
             No encontramos centros con ese filtro.
           </Text>
         </View>
@@ -237,8 +235,7 @@ function CenterCard({
   center: RecyclingCenter;
   onFocusMap: (centerId: string) => void;
 }) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
 
   return (
     <Link href={{ pathname: "/recycling-center/[id]", params: { id: center.id } }} asChild>
@@ -246,8 +243,8 @@ function CenterCard({
         style={{
           borderRadius: 8,
           borderWidth: 1,
-          borderColor: isDark ? "#314139" : "#dbe4df",
-          backgroundColor: isDark ? "#17231f" : "#ffffff",
+          borderColor: isDark ? "#314139" : "#d1d5db",
+          backgroundColor: isDark ? "#ffffff" : "#ffffff",
           padding: 14,
           gap: 10,
         }}
@@ -256,18 +253,18 @@ function CenterCard({
           <View style={{ flex: 1, gap: 4 }}>
             <Text
               selectable
-              style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 16, fontWeight: "900" }}
+              style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 16, fontWeight: "900" }}
             >
               {center.name}
             </Text>
-            <Text selectable style={{ color: "#28734f", fontSize: 12, fontWeight: "800" }}>
+            <Text selectable style={{ color: "#2d6a4f", fontSize: 12, fontWeight: "800" }}>
               {getCenterLocation(center)}
             </Text>
           </View>
           <View
             style={{
               borderRadius: 999,
-              backgroundColor: "#d7f8df",
+              backgroundColor: "#d8f3dc",
               paddingHorizontal: 9,
               paddingVertical: 5,
               alignSelf: "flex-start",
@@ -277,7 +274,7 @@ function CenterCard({
           </View>
         </View>
         {center.address ? (
-          <Text selectable numberOfLines={2} style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 13 }}>
+          <Text selectable numberOfLines={2} style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 13 }}>
             {center.address}
           </Text>
         ) : null}
@@ -312,7 +309,8 @@ function ActionPill({ label }: { label: string }) {
         paddingHorizontal: 10,
       }}
     >
-      <Text style={{ color: "#28734f", fontSize: 12, fontWeight: "900" }}>{label}</Text>
+      <Text style={{ color: "#2d6a4f", fontSize: 12, fontWeight: "900" }}>{label}</Text>
     </View>
   );
 }
+

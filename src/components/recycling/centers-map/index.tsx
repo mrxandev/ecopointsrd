@@ -14,16 +14,17 @@ export function CentersMap({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#d7f8df",
+        backgroundColor: "#d8f3dc",
         padding: 20,
       }}
     >
       <Text selectable style={{ color: "#166534", fontWeight: "900", textAlign: "center" }}>
         Mapa disponible en iOS y Android
       </Text>
-      <Text selectable style={{ color: "#28734f", marginTop: 6, textAlign: "center" }}>
+      <Text selectable style={{ color: "#2d6a4f", marginTop: 6, textAlign: "center" }}>
         {centers.length} centros con coordenadas listas para ubicarse.
       </Text>
     </View>
   );
 }
+

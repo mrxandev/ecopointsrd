@@ -7,7 +7,7 @@ import {
   RefreshControl,
   ScrollView,
   Text,
-  useColorScheme,
+  useWindowDimensions,
   View,
 } from "react-native";
 
@@ -25,12 +25,12 @@ import {
 } from "@/services/mission-service";
 
 const FILTERS = ["Todas", "Esta semana", "Mayor puntuacion"] as const;
-const VIEWS = ["Disponibles", "Mis misiones"] as const;
+const VIEWS = ["Disponibles", "Inscritas", "Completadas"] as const;
 
 export function MissionsScreen() {
   const { token } = useAuth();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
+  const { width } = useWindowDimensions();
   const [view, setView] = useState<(typeof VIEWS)[number]>("Disponibles");
   const [missions, setMissions] = useState<Mission[]>([]);
   const [registrations, setRegistrations] = useState<MissionRegistration[]>([]);
@@ -89,6 +89,11 @@ export function MissionsScreen() {
     [registrations],
   );
 
+  const activeRegistrations = useMemo(
+    () => registrations.filter((registration) => registration.status !== "CANCELLED"),
+    [registrations],
+  );
+
   const filteredMissions = useMemo(() => {
     const nextMissions = [...missions];
 
@@ -121,64 +126,51 @@ export function MissionsScreen() {
       refreshControl={
         <RefreshControl refreshing={isRefreshing} onRefresh={() => void loadMissions("refresh")} />
       }
-      style={{ flex: 1, backgroundColor: isDark ? "#101815" : "#f4f7f3" }}
-      contentContainerStyle={{ padding: 16, paddingBottom: 92, gap: 16 }}
+      style={{ flex: 1, backgroundColor: isDark ? "#f9f9ff" : "#f9f9ff" }}
+      contentContainerStyle={{ padding: 16, paddingBottom: 92, gap: 14 }}
     >
-      <View style={{ gap: 4 }}>
+      <View style={{ gap: 12 }}>
         <Text
           selectable
           style={{
-            color: isDark ? "#f3fbf6" : "#17231f",
-            fontSize: 28,
-            fontWeight: "800",
+            color: isDark ? "#f3fbf6" : "#141b2b",
+            fontSize: 24,
+            fontWeight: "900",
           }}
         >
           Misiones
         </Text>
-        <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 14 }}>
-          Explora actividades ambientales, inscribete y da seguimiento a tu avance.
-        </Text>
-      </View>
+        <View style={{ borderBottomWidth: 1, borderBottomColor: "#d1d5db", flexDirection: "row" }}>
+          {VIEWS.map((item) => {
+            const isActive = item === view;
 
-      <View
-        style={{
-          flexDirection: "row",
-          borderRadius: 8,
-          backgroundColor: isDark ? "#17231f" : "#ffffff",
-          borderWidth: 1,
-          borderColor: isDark ? "#314139" : "#dbe4df",
-          padding: 4,
-        }}
-      >
-        {VIEWS.map((item) => {
-          const isActive = item === view;
-
-          return (
-            <Pressable
-              accessibilityRole="button"
-              key={item}
-              onPress={() => setView(item)}
-              style={{
-                flex: 1,
-                minHeight: 38,
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: 6,
-                backgroundColor: isActive ? "#28734f" : "transparent",
-              }}
-            >
-              <Text
+            return (
+              <Pressable
+                accessibilityRole="button"
+                key={item}
+                onPress={() => setView(item)}
                 style={{
-                  color: isActive ? "#ffffff" : isDark ? "#dce8e1" : "#34483e",
-                  fontSize: 13,
-                  fontWeight: "800",
+                  flex: 1,
+                  minHeight: 34,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderBottomWidth: 2,
+                  borderBottomColor: isActive ? "#0f5238" : "transparent",
                 }}
               >
-                {item}
-              </Text>
-            </Pressable>
-          );
-        })}
+                <Text
+                  style={{
+                    color: isActive ? "#0f5238" : "#404943",
+                    fontSize: 11,
+                    fontWeight: "800",
+                  }}
+                >
+                  {item}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
 
       {view === "Disponibles" ? (
@@ -196,16 +188,16 @@ export function MissionsScreen() {
                   alignItems: "center",
                   justifyContent: "center",
                   borderRadius: 999,
-                  backgroundColor: isActive ? "#28734f" : isDark ? "#1b2823" : "#ffffff",
+                  backgroundColor: isActive ? "#2d6a4f" : isDark ? "#1b2823" : "#ffffff",
                   borderWidth: 1,
-                  borderColor: isActive ? "#28734f" : isDark ? "#314139" : "#dbe4df",
-                  paddingHorizontal: 12,
+                  borderColor: isActive ? "#2d6a4f" : isDark ? "#314139" : "#d1d5db",
+                  paddingHorizontal: 13,
                 }}
               >
                 <Text
                   style={{
-                    color: isActive ? "#ffffff" : isDark ? "#dce8e1" : "#34483e",
-                    fontSize: 12,
+                    color: isActive ? "#ffffff" : isDark ? "#dce8e1" : "#404943",
+                    fontSize: 11,
                     fontWeight: "700",
                   }}
                 >
@@ -219,8 +211,8 @@ export function MissionsScreen() {
 
       {isLoading ? (
         <View style={{ minHeight: 280, alignItems: "center", justifyContent: "center", gap: 12 }}>
-          <ActivityIndicator color="#28734f" />
-          <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 14 }}>
+          <ActivityIndicator color="#2d6a4f" />
+          <Text selectable style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 14 }}>
             Cargando misiones...
           </Text>
         </View>
@@ -232,12 +224,12 @@ export function MissionsScreen() {
             borderRadius: 8,
             borderWidth: 1,
             borderColor: "#f2b8b5",
-            backgroundColor: isDark ? "#351d1b" : "#fff0ee",
+            backgroundColor: isDark ? "#351d1b" : "#ffdad6",
             padding: 16,
             gap: 12,
           }}
         >
-          <Text selectable style={{ color: isDark ? "#ffd9d6" : "#8c1d18", fontWeight: "700" }}>
+          <Text selectable style={{ color: isDark ? "#ffd9d6" : "#93000a", fontWeight: "700" }}>
             {error}
           </Text>
           <Pressable
@@ -248,7 +240,7 @@ export function MissionsScreen() {
               alignItems: "center",
               justifyContent: "center",
               borderRadius: 8,
-              backgroundColor: "#28734f",
+              backgroundColor: "#2d6a4f",
             }}
           >
             <Text style={{ color: "#ffffff", fontWeight: "800" }}>Reintentar</Text>
@@ -262,13 +254,18 @@ export function MissionsScreen() {
               key={mission.id}
               mission={mission}
               isRegistered={registeredMissionIds.has(mission.id)}
+              screenWidth={width}
             />
           ))
         : null}
 
-      {!isLoading && !error && view === "Mis misiones"
-        ? registrations
-            .filter((registration) => registration.status !== "CANCELLED")
+      {!isLoading && !error && view !== "Disponibles"
+        ? activeRegistrations
+            .filter((registration) =>
+              view === "Completadas"
+                ? registration.status === "COMPLETED"
+                : registration.status !== "COMPLETED",
+            )
             .map((registration) => (
               <RegistrationCard key={registration.id} registration={registration} />
             ))
@@ -277,27 +274,33 @@ export function MissionsScreen() {
       {!isLoading &&
       !error &&
       ((view === "Disponibles" && filteredMissions.length === 0) ||
-        (view === "Mis misiones" &&
-          registrations.filter((registration) => registration.status !== "CANCELLED").length === 0)) ? (
+        (view === "Inscritas" &&
+          activeRegistrations.filter((registration) => registration.status !== "COMPLETED").length === 0) ||
+        (view === "Completadas" &&
+          activeRegistrations.filter((registration) => registration.status === "COMPLETED").length === 0)) ? (
         <View
           style={{
             minHeight: 220,
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 8,
-            backgroundColor: isDark ? "#17231f" : "#ffffff",
+            backgroundColor: isDark ? "#ffffff" : "#ffffff",
             padding: 20,
             gap: 8,
           }}
         >
-          <Text selectable style={{ color: isDark ? "#f3fbf6" : "#17231f", fontWeight: "800" }}>
-            {view === "Disponibles" ? "No hay misiones disponibles." : "Aun no te has inscrito."}
+          <Text selectable style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontWeight: "800" }}>
+            {view === "Disponibles"
+              ? "No hay misiones disponibles."
+              : view === "Completadas"
+                ? "Aun no tienes misiones completadas."
+                : "Aun no te has inscrito."}
           </Text>
           <Text
             selectable
-            style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 13, textAlign: "center" }}
+            style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 13, textAlign: "center" }}
           >
-            {view === "Mis misiones"
+            {view === "Inscritas"
               ? "Inscribete en una mision disponible para verla aqui."
               : "Vuelve a intentar mas tarde."}
           </Text>
@@ -307,13 +310,25 @@ export function MissionsScreen() {
   );
 }
 
-function MissionCard({ isRegistered, mission }: { isRegistered: boolean; mission: Mission }) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+function MissionCard({
+  isRegistered,
+  mission,
+  screenWidth,
+}: {
+  isRegistered: boolean;
+  mission: Mission;
+  screenWidth: number;
+}) {
+  const isDark = false;
+  const imageHeight = Math.min(170, Math.max(130, (screenWidth - 32) * 0.42));
   const availableSlots =
     mission.max_participants && typeof mission.registered_count === "number"
       ? Math.max(mission.max_participants - mission.registered_count, 0)
       : null;
+  const participantProgress =
+    mission.max_participants && typeof mission.registered_count === "number"
+      ? Math.min(Math.max(mission.registered_count / mission.max_participants, 0), 1)
+      : 0;
 
   return (
     <Link href={{ pathname: "/mission/[id]", params: { id: mission.id } }} asChild>
@@ -322,16 +337,17 @@ function MissionCard({ isRegistered, mission }: { isRegistered: boolean; mission
           overflow: "hidden",
           borderRadius: 8,
           borderWidth: 1,
-          borderColor: isDark ? "#314139" : "#dbe4df",
-          backgroundColor: isDark ? "#17231f" : "#ffffff",
+          borderColor: isDark ? "#314139" : "#e1e8fd",
+          backgroundColor: isDark ? "#ffffff" : "#ffffff",
+          boxShadow: "0 2px 8px rgba(20, 27, 43, 0.08)",
         }}
       >
-        <View style={{ minHeight: 150 }}>
+        <View style={{ minHeight: imageHeight }}>
           <Image
             source={getMissionImage(mission.id)}
             contentFit="cover"
             transition={180}
-            style={{ height: 150, width: "100%" }}
+            style={{ height: imageHeight, width: "100%" }}
           />
           <View
             style={{
@@ -339,27 +355,27 @@ function MissionCard({ isRegistered, mission }: { isRegistered: boolean; mission
               right: 10,
               top: 10,
               borderRadius: 999,
-              backgroundColor: isRegistered ? "#e0f2fe" : "#dcfce7",
+              backgroundColor: isRegistered ? "#d4e3ff" : "#d8f3dc",
               paddingHorizontal: 10,
               paddingVertical: 5,
             }}
           >
-            <Text style={{ color: isRegistered ? "#075985" : "#166534", fontSize: 12, fontWeight: "900" }}>
+            <Text style={{ color: isRegistered ? "#0f4883" : "#0f5238", fontSize: 11, fontWeight: "900" }}>
               {isRegistered ? "Inscrito" : `+${mission.points_reward} pts`}
             </Text>
           </View>
         </View>
 
-        <View style={{ padding: 14, gap: 10 }}>
-          <View style={{ gap: 4 }}>
+        <View style={{ padding: 12, gap: 9 }}>
+          <View style={{ gap: 5 }}>
             <Text
               selectable
               numberOfLines={2}
               style={{
-                color: isDark ? "#f3fbf6" : "#17231f",
-                fontSize: 16,
+                color: isDark ? "#f3fbf6" : "#141b2b",
+                fontSize: 14,
                 fontWeight: "900",
-                lineHeight: 20,
+                lineHeight: 18,
               }}
             >
               {mission.title}
@@ -367,7 +383,7 @@ function MissionCard({ isRegistered, mission }: { isRegistered: boolean; mission
             <Text
               selectable
               numberOfLines={2}
-              style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 13, lineHeight: 18 }}
+              style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 12, lineHeight: 17 }}
             >
               {mission.description}
             </Text>
@@ -375,35 +391,46 @@ function MissionCard({ isRegistered, mission }: { isRegistered: boolean; mission
 
           <Text
             selectable
-            style={{ color: "#28734f", fontSize: 12, fontWeight: "800" }}
+            style={{ color: "#2d6a4f", fontSize: 11, fontWeight: "800" }}
             numberOfLines={1}
           >
             {getMissionLocation(mission)}
           </Text>
 
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-            <View style={{ gap: 2 }}>
-              <Text selectable style={{ color: isDark ? "#c9d6cf" : "#4d6258", fontSize: 12 }}>
-                {formatMissionDate(mission.start_date)}
+          <View style={{ gap: 5 }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
+              <Text selectable style={{ color: "#2d6a4f", fontSize: 11, fontWeight: "800" }}>
+                Participantes
               </Text>
-              {availableSlots !== null ? (
-                <Text selectable style={{ color: isDark ? "#9fb0a7" : "#63786e", fontSize: 11 }}>
-                  {availableSlots} cupos disponibles
-                </Text>
-              ) : null}
+              <Text selectable style={{ color: "#404943", fontSize: 11, fontWeight: "700" }}>
+                {mission.max_participants && typeof mission.registered_count === "number"
+                  ? `${mission.registered_count} de ${mission.max_participants}`
+                  : "Abierta"}
+              </Text>
+            </View>
+            <ProgressBar progress={participantProgress} />
+          </View>
+
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <CalendarIcon color="#404943" />
+              <Text selectable numberOfLines={1} style={{ color: isDark ? "#c9d6cf" : "#404943", fontSize: 11 }}>
+                {formatMissionDate(mission.start_date)}
+                {availableSlots !== null ? ` · ${availableSlots} cupos` : ""}
+              </Text>
             </View>
             <View
               style={{
-                minHeight: 34,
+                minHeight: 32,
                 alignItems: "center",
                 justifyContent: "center",
-                borderRadius: 8,
-                backgroundColor: isRegistered ? "#075985" : "#0f5f43",
-                paddingHorizontal: 14,
+                borderRadius: 6,
+                backgroundColor: isRegistered ? "#075985" : "#0f5238",
+                paddingHorizontal: 16,
               }}
             >
-              <Text style={{ color: "#ffffff", fontSize: 12, fontWeight: "900" }}>
-                {isRegistered ? "Ver avance" : "Inscribirme"}
+              <Text style={{ color: "#ffffff", fontSize: 11, fontWeight: "900" }}>
+                {isRegistered ? "Ver avance" : "Inscribirse"}
               </Text>
             </View>
           </View>
@@ -413,9 +440,43 @@ function MissionCard({ isRegistered, mission }: { isRegistered: boolean; mission
   );
 }
 
+function ProgressBar({ progress }: { progress: number }) {
+  return (
+    <View style={{ height: 6, borderRadius: 999, backgroundColor: "#e9edff", overflow: "hidden" }}>
+      <View
+        style={{
+          height: "100%",
+          width: `${Math.round(progress * 100)}%`,
+          borderRadius: 999,
+          backgroundColor: "#52b788",
+        }}
+      />
+    </View>
+  );
+}
+
+function CalendarIcon({ color }: { color: string }) {
+  return (
+    <View style={{ width: 13, height: 13 }}>
+      <View
+        style={{
+          width: 12,
+          height: 11,
+          borderWidth: 1.2,
+          borderColor: color,
+          borderRadius: 2,
+          marginTop: 2,
+        }}
+      />
+      <View style={{ position: "absolute", top: 5, left: 1, right: 0, height: 1.2, backgroundColor: color }} />
+      <View style={{ position: "absolute", top: 0, left: 3, width: 1.2, height: 4, backgroundColor: color }} />
+      <View style={{ position: "absolute", top: 0, right: 3, width: 1.2, height: 4, backgroundColor: color }} />
+    </View>
+  );
+}
+
 function RegistrationCard({ registration }: { registration: MissionRegistration }) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
 
   return (
     <Link href={{ pathname: "/mission/[id]", params: { id: registration.mission_id } }} asChild>
@@ -423,8 +484,8 @@ function RegistrationCard({ registration }: { registration: MissionRegistration 
         style={{
           borderRadius: 8,
           borderWidth: 1,
-          borderColor: isDark ? "#314139" : "#dbe4df",
-          backgroundColor: isDark ? "#17231f" : "#ffffff",
+          borderColor: isDark ? "#314139" : "#d1d5db",
+          backgroundColor: isDark ? "#ffffff" : "#ffffff",
           padding: 14,
           gap: 10,
         }}
@@ -435,7 +496,7 @@ function RegistrationCard({ registration }: { registration: MissionRegistration 
             numberOfLines={2}
             style={{
               flex: 1,
-              color: isDark ? "#f3fbf6" : "#17231f",
+              color: isDark ? "#f3fbf6" : "#141b2b",
               fontSize: 16,
               fontWeight: "900",
               lineHeight: 20,
@@ -466,15 +527,15 @@ function RegistrationCard({ registration }: { registration: MissionRegistration 
         <Text
           selectable
           numberOfLines={2}
-          style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 13, lineHeight: 18 }}
+          style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 13, lineHeight: 18 }}
         >
           {registration.description}
         </Text>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text selectable style={{ color: "#28734f", fontSize: 12, fontWeight: "800" }}>
+          <Text selectable style={{ color: "#2d6a4f", fontSize: 12, fontWeight: "800" }}>
             {registration.mission_type}
           </Text>
-          <Text selectable style={{ color: isDark ? "#c9d6cf" : "#4d6258", fontSize: 12 }}>
+          <Text selectable style={{ color: isDark ? "#c9d6cf" : "#404943", fontSize: 12 }}>
             +{registration.points_reward} pts
           </Text>
         </View>
@@ -482,3 +543,4 @@ function RegistrationCard({ registration }: { registration: MissionRegistration 
     </Link>
   );
 }
+

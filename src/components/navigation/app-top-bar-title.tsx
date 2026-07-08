@@ -1,8 +1,7 @@
-import { Text, View, useColorScheme } from "react-native";
+import { Text, View } from "react-native";
 
 export function AppTopBarTitle() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
 
   return (
     <View
@@ -18,7 +17,7 @@ export function AppTopBarTitle() {
       <BrandLeaf />
       <Text
         style={{
-          color: isDark ? "#f3fbf6" : "#163326",
+          color: isDark ? "#f3fbf6" : "#141b2b",
           fontSize: 13,
           fontWeight: "800",
           lineHeight: 18,
@@ -48,7 +47,7 @@ function BrandLeaf() {
           borderTopRightRadius: 2,
           borderBottomLeftRadius: 2,
           borderBottomRightRadius: 9,
-          backgroundColor: "#28734f",
+          backgroundColor: "#2d6a4f",
           transform: [{ rotate: "45deg" }],
         }}
       />
@@ -65,3 +64,4 @@ function BrandLeaf() {
     </View>
   );
 }
+

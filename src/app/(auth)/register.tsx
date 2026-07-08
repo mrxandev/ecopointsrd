@@ -6,7 +6,6 @@ import {
   ScrollView,
   Text,
   TextInput,
-  useColorScheme,
   View,
 } from "react-native";
 
@@ -41,8 +40,7 @@ function normalizeName(value: string) {
 
 export default function RegisterScreen() {
   const { register } = useAuth();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
   const [cedula, setCedula] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -112,21 +110,21 @@ export default function RegisterScreen() {
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       keyboardShouldPersistTaps="handled"
-      style={{ flex: 1, backgroundColor: isDark ? "#101815" : "#f7f8fb" }}
+      style={{ flex: 1, backgroundColor: isDark ? "#f9f9ff" : "#f9f9ff" }}
       contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 24, gap: 18 }}
     >
       <View style={{ gap: 8 }}>
         <Text
           selectable
           style={{
-            color: isDark ? "#f3fbf6" : "#163326",
+            color: isDark ? "#f3fbf6" : "#141b2b",
             fontSize: 32,
             fontWeight: "800",
           }}
         >
           Crear cuenta
         </Text>
-        <Text selectable style={{ color: isDark ? "#c9d6cf" : "#4d6258", fontSize: 16 }}>
+        <Text selectable style={{ color: isDark ? "#c9d6cf" : "#404943", fontSize: 16 }}>
           Solo necesitamos los datos obligatorios para empezar.
         </Text>
       </View>
@@ -191,7 +189,7 @@ export default function RegisterScreen() {
           alignItems: "center",
           justifyContent: "center",
           borderRadius: 8,
-          backgroundColor: isSubmitting ? "#90a79b" : "#28734f",
+          backgroundColor: isSubmitting ? "#90a79b" : "#2d6a4f",
         }}
       >
         {isSubmitting ? (
@@ -205,7 +203,7 @@ export default function RegisterScreen() {
 
       <Link href="/login" asChild>
         <Pressable accessibilityRole="button" style={{ minHeight: 42, alignItems: "center", justifyContent: "center" }}>
-          <Text style={{ color: "#28734f", fontSize: 14, fontWeight: "800" }}>
+          <Text style={{ color: "#2d6a4f", fontSize: 14, fontWeight: "800" }}>
             Ya tengo cuenta
           </Text>
         </Pressable>
@@ -239,15 +237,14 @@ function AuthInput({
   secureTextEntry?: boolean;
   value: string;
 }) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
   const shouldHideText = Boolean(secureTextEntry && !isPasswordVisible);
 
   return (
     <View style={{ gap: 6 }}>
       <Text
         selectable
-        style={{ color: isDark ? "#dce8e1" : "#34483e", fontSize: 13, fontWeight: "800" }}
+        style={{ color: isDark ? "#dce8e1" : "#404943", fontSize: 13, fontWeight: "800" }}
       >
         {label}
       </Text>
@@ -258,8 +255,8 @@ function AuthInput({
           alignItems: "center",
           borderRadius: 8,
           borderWidth: 1,
-          borderColor: isDark ? "#314139" : "#d4ddd8",
-          backgroundColor: isDark ? "#17231f" : "#ffffff",
+          borderColor: isDark ? "#314139" : "#d1d5db",
+          backgroundColor: isDark ? "#ffffff" : "#ffffff",
         }}
       >
         <TextInput
@@ -274,7 +271,7 @@ function AuthInput({
           style={{
             minHeight: 52,
             flex: 1,
-            color: isDark ? "#ffffff" : "#17231f",
+            color: isDark ? "#ffffff" : "#141b2b",
             paddingHorizontal: 16,
             paddingRight: secureTextEntry ? 8 : 16,
             fontSize: 16,
@@ -293,7 +290,7 @@ function AuthInput({
               justifyContent: "center",
             }}
           >
-            <Text style={{ color: "#28734f", fontSize: 18, fontWeight: "900" }}>
+            <Text style={{ color: "#2d6a4f", fontSize: 18, fontWeight: "900" }}>
               {isPasswordVisible ? "◉" : "◌"}
             </Text>
           </Pressable>
@@ -302,3 +299,4 @@ function AuthInput({
     </View>
   );
 }
+

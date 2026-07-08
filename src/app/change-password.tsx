@@ -6,7 +6,6 @@ import {
   ScrollView,
   Text,
   TextInput,
-  useColorScheme,
   View,
 } from "react-native";
 
@@ -16,8 +15,7 @@ import { changePasswordRequest } from "@/services/auth-service";
 export default function ChangePasswordScreen() {
   const { token } = useAuth();
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -76,17 +74,17 @@ export default function ChangePasswordScreen() {
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       keyboardShouldPersistTaps="handled"
-      style={{ flex: 1, backgroundColor: isDark ? "#101815" : "#f4f7f3" }}
+      style={{ flex: 1, backgroundColor: isDark ? "#f9f9ff" : "#f9f9ff" }}
       contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 24, gap: 18 }}
     >
       <View style={{ gap: 8 }}>
         <Text
           selectable
-          style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 30, fontWeight: "900" }}
+          style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 30, fontWeight: "900" }}
         >
           Cambiar contrasena
         </Text>
-        <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 15 }}>
+        <Text selectable style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 15 }}>
           Usa una nueva contrasena de minimo 8 caracteres.
         </Text>
       </View>
@@ -113,11 +111,11 @@ export default function ChangePasswordScreen() {
         <View
           style={{
             borderRadius: 8,
-            backgroundColor: isSuccess ? "#d7f8df" : "#fff0ee",
+            backgroundColor: isSuccess ? "#d8f3dc" : "#ffdad6",
             padding: 12,
           }}
         >
-          <Text selectable style={{ color: isSuccess ? "#166534" : "#8c1d18", fontWeight: "800" }}>
+          <Text selectable style={{ color: isSuccess ? "#166534" : "#93000a", fontWeight: "800" }}>
             {message}
           </Text>
         </View>
@@ -132,7 +130,7 @@ export default function ChangePasswordScreen() {
           alignItems: "center",
           justifyContent: "center",
           borderRadius: 8,
-          backgroundColor: isSubmitting ? "#90a79b" : "#28734f",
+          backgroundColor: isSubmitting ? "#90a79b" : "#2d6a4f",
         }}
       >
         {isSubmitting ? (
@@ -149,7 +147,7 @@ export default function ChangePasswordScreen() {
         onPress={() => router.back()}
         style={{ minHeight: 42, alignItems: "center", justifyContent: "center" }}
       >
-        <Text style={{ color: "#28734f", fontSize: 14, fontWeight: "800" }}>Volver</Text>
+        <Text style={{ color: "#2d6a4f", fontSize: 14, fontWeight: "800" }}>Volver</Text>
       </Pressable>
     </ScrollView>
   );
@@ -164,8 +162,7 @@ function PasswordInput({
   placeholder: string;
   value: string;
 }) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
 
   return (
     <TextInput
@@ -178,9 +175,9 @@ function PasswordInput({
         minHeight: 52,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: isDark ? "#314139" : "#d4ddd8",
-        backgroundColor: isDark ? "#17231f" : "#ffffff",
-        color: isDark ? "#ffffff" : "#17231f",
+        borderColor: isDark ? "#314139" : "#d1d5db",
+        backgroundColor: isDark ? "#ffffff" : "#ffffff",
+        color: isDark ? "#ffffff" : "#141b2b",
         paddingHorizontal: 16,
         fontSize: 16,
       }}
@@ -188,3 +185,4 @@ function PasswordInput({
     />
   );
 }
+

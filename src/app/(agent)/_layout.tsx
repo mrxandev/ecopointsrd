@@ -1,16 +1,15 @@
 import { Tabs } from "expo-router";
 import type { ComponentProps } from "react";
-import { type ColorValue, View, useColorScheme } from "react-native";
+import { type ColorValue, View } from "react-native";
 
 import { AppTopBarTitle } from "@/components/navigation/app-top-bar-title";
 
-const ACTIVE_COLOR = "#28734f";
+const ACTIVE_COLOR = "#2d6a4f";
 const INACTIVE_COLOR = "#34424a";
 const BAR_BORDER = "#d7dde0";
 
 export default function AgentTabsLayout() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
 
   return (
     <Tabs
@@ -20,7 +19,7 @@ export default function AgentTabsLayout() {
         headerTitleAlign: "center",
         headerShadowVisible: true,
         headerStyle: {
-          backgroundColor: isDark ? "#111816" : "#ffffff",
+          backgroundColor: isDark ? "#ffffff" : "#ffffff",
         },
         headerLeft: () => null,
         tabBarActiveTintColor: ACTIVE_COLOR,
@@ -34,7 +33,7 @@ export default function AgentTabsLayout() {
           height: 64,
           paddingTop: 7,
           paddingBottom: 6,
-          backgroundColor: isDark ? "#111816" : "#ffffff",
+          backgroundColor: isDark ? "#ffffff" : "#ffffff",
           borderTopColor: isDark ? "#26332f" : BAR_BORDER,
           borderTopWidth: 1,
         },
@@ -133,3 +132,4 @@ function IconGlyph({
     </View>
   );
 }
+

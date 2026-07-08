@@ -5,7 +5,6 @@ import {
   RefreshControl,
   ScrollView,
   Text,
-  useColorScheme,
   View,
 } from "react-native";
 import { Image } from "expo-image";
@@ -24,8 +23,7 @@ const VIEWS = ["Disponibles", "Mis canjes"] as const;
 
 export function RewardsScreen() {
   const { token } = useAuth();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
   const [view, setView] = useState<(typeof VIEWS)[number]>("Disponibles");
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [redemptions, setRedemptions] = useState<RewardRedemption[]>([]);
@@ -108,17 +106,17 @@ export function RewardsScreen() {
       refreshControl={
         <RefreshControl refreshing={isRefreshing} onRefresh={() => void loadRewards("refresh")} />
       }
-      style={{ flex: 1, backgroundColor: isDark ? "#101815" : "#f4f7f3" }}
+      style={{ flex: 1, backgroundColor: isDark ? "#f9f9ff" : "#f9f9ff" }}
       contentContainerStyle={{ padding: 16, paddingBottom: 92, gap: 16 }}
     >
       <View style={{ gap: 4 }}>
         <Text
           selectable
-          style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 28, fontWeight: "900" }}
+          style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 28, fontWeight: "900" }}
         >
           Recompensas
         </Text>
-        <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 14 }}>
+        <Text selectable style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 14 }}>
           Tienes {new Intl.NumberFormat("es-DO").format(points)} puntos disponibles.
         </Text>
       </View>
@@ -127,9 +125,9 @@ export function RewardsScreen() {
         style={{
           flexDirection: "row",
           borderRadius: 8,
-          backgroundColor: isDark ? "#17231f" : "#ffffff",
+          backgroundColor: isDark ? "#ffffff" : "#ffffff",
           borderWidth: 1,
-          borderColor: isDark ? "#314139" : "#dbe4df",
+          borderColor: isDark ? "#314139" : "#d1d5db",
           padding: 4,
         }}
       >
@@ -147,12 +145,12 @@ export function RewardsScreen() {
                 alignItems: "center",
                 justifyContent: "center",
                 borderRadius: 6,
-                backgroundColor: isActive ? "#28734f" : "transparent",
+                backgroundColor: isActive ? "#2d6a4f" : "transparent",
               }}
             >
               <Text
                 style={{
-                  color: isActive ? "#ffffff" : isDark ? "#dce8e1" : "#34483e",
+                  color: isActive ? "#ffffff" : isDark ? "#dce8e1" : "#404943",
                   fontSize: 13,
                   fontWeight: "800",
                 }}
@@ -166,8 +164,8 @@ export function RewardsScreen() {
 
       {isLoading ? (
         <View style={{ minHeight: 280, alignItems: "center", justifyContent: "center", gap: 12 }}>
-          <ActivityIndicator color="#28734f" />
-          <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c" }}>
+          <ActivityIndicator color="#2d6a4f" />
+          <Text selectable style={{ color: isDark ? "#b8c7bf" : "#404943" }}>
             Cargando recompensas...
           </Text>
         </View>
@@ -207,11 +205,11 @@ export function RewardsScreen() {
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 8,
-            backgroundColor: isDark ? "#17231f" : "#ffffff",
+            backgroundColor: isDark ? "#ffffff" : "#ffffff",
             padding: 20,
           }}
         >
-          <Text selectable style={{ color: isDark ? "#f3fbf6" : "#17231f", fontWeight: "900" }}>
+          <Text selectable style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontWeight: "900" }}>
             {view === "Disponibles" ? "No hay recompensas activas." : "Aun no tienes canjes."}
           </Text>
         </View>
@@ -231,8 +229,7 @@ function RewardCard({
   redeemingId: string | null;
   reward: Reward;
 }) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
   const canRedeem = points >= reward.points_required && reward.stock > 0;
 
   return (
@@ -241,8 +238,8 @@ function RewardCard({
         overflow: "hidden",
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: isDark ? "#314139" : "#dbe4df",
-        backgroundColor: isDark ? "#17231f" : "#ffffff",
+        borderColor: isDark ? "#314139" : "#d1d5db",
+        backgroundColor: isDark ? "#ffffff" : "#ffffff",
       }}
     >
       {reward.image_url ? (
@@ -252,16 +249,16 @@ function RewardCard({
         <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
           <Text
             selectable
-            style={{ flex: 1, color: isDark ? "#f3fbf6" : "#17231f", fontSize: 16, fontWeight: "900" }}
+            style={{ flex: 1, color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 16, fontWeight: "900" }}
           >
             {reward.title}
           </Text>
-          <Text selectable style={{ color: "#28734f", fontWeight: "900" }}>
+          <Text selectable style={{ color: "#2d6a4f", fontWeight: "900" }}>
             {reward.points_required} pts
           </Text>
         </View>
         {reward.description ? (
-          <Text selectable numberOfLines={2} style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 13 }}>
+          <Text selectable numberOfLines={2} style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 13 }}>
             {reward.description}
           </Text>
         ) : null}
@@ -274,7 +271,7 @@ function RewardCard({
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 8,
-            backgroundColor: canRedeem ? "#28734f" : "#90a79b",
+            backgroundColor: canRedeem ? "#2d6a4f" : "#90a79b",
           }}
         >
           {redeemingId === reward.id ? (
@@ -291,27 +288,26 @@ function RewardCard({
 }
 
 function RedemptionCard({ redemption }: { redemption: RewardRedemption }) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
 
   return (
     <View
       style={{
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: isDark ? "#314139" : "#dbe4df",
-        backgroundColor: isDark ? "#17231f" : "#ffffff",
+        borderColor: isDark ? "#314139" : "#d1d5db",
+        backgroundColor: isDark ? "#ffffff" : "#ffffff",
         padding: 14,
         gap: 6,
       }}
     >
-      <Text selectable style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 16, fontWeight: "900" }}>
+      <Text selectable style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 16, fontWeight: "900" }}>
         {redemption.title}
       </Text>
-      <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 13 }}>
+      <Text selectable style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 13 }}>
         {redemption.points_spent} puntos gastados
       </Text>
-      <Text selectable style={{ color: "#28734f", fontSize: 12, fontWeight: "800" }}>
+      <Text selectable style={{ color: "#2d6a4f", fontSize: 12, fontWeight: "800" }}>
         {redemption.status}
       </Text>
     </View>
@@ -323,13 +319,14 @@ function MessageCard({ danger, message }: { danger?: boolean; message: string })
     <View
       style={{
         borderRadius: 8,
-        backgroundColor: danger ? "#fff0ee" : "#d7f8df",
+        backgroundColor: danger ? "#ffdad6" : "#d8f3dc",
         padding: 12,
       }}
     >
-      <Text selectable style={{ color: danger ? "#8c1d18" : "#166534", fontWeight: "800" }}>
+      <Text selectable style={{ color: danger ? "#93000a" : "#166534", fontWeight: "800" }}>
         {message}
       </Text>
     </View>
   );
 }
+

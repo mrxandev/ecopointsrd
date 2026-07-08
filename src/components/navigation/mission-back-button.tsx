@@ -1,10 +1,9 @@
 import { useRouter } from "expo-router";
-import { Pressable, Text, useColorScheme } from "react-native";
+import { Pressable, Text } from "react-native";
 
 export function MissionBackButton() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
 
   return (
     <Pressable
@@ -18,9 +17,10 @@ export function MissionBackButton() {
         paddingHorizontal: 10,
       }}
     >
-      <Text style={{ color: isDark ? "#f3fbf6" : "#163326", fontSize: 28, lineHeight: 30 }}>
+      <Text style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 28, lineHeight: 30 }}>
         {"<"}
       </Text>
     </Pressable>
   );
 }
+

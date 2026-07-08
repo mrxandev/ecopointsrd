@@ -5,8 +5,6 @@ import {
   Pressable,
   ScrollView,
   Text,
-  TextInput,
-  useColorScheme,
   View,
 } from "react-native";
 import { Image } from "expo-image";
@@ -23,23 +21,18 @@ import {
   registerMission,
   type Mission,
   unregisterMission,
-  uploadMissionEvidence,
 } from "@/services/mission-service";
 
 export function MissionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { token } = useAuth();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
   const [mission, setMission] = useState<Mission | null>(null);
   const [isRegistered, setIsRegistered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isUploadingEvidence, setIsUploadingEvidence] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
-  const [evidenceUrl, setEvidenceUrl] = useState("");
-  const [evidenceDescription, setEvidenceDescription] = useState("");
 
   const loadMission = useCallback(async () => {
     if (!id) {
@@ -119,39 +112,6 @@ export function MissionDetailScreen() {
     }
   }
 
-  async function handleEvidenceSubmit() {
-    if (!id || !token) {
-      setActionMessage("Inicia sesion nuevamente para subir evidencia.");
-      return;
-    }
-
-    const cleanUrl = evidenceUrl.trim();
-
-    if (!cleanUrl) {
-      setActionMessage("Agrega el enlace de tu evidencia para continuar.");
-      return;
-    }
-
-    setIsUploadingEvidence(true);
-    setActionMessage(null);
-
-    try {
-      const response = await uploadMissionEvidence(id, token, {
-        file_url: cleanUrl,
-        description: evidenceDescription.trim() || undefined,
-      });
-      setEvidenceUrl("");
-      setEvidenceDescription("");
-      setActionMessage(response?.message ?? "Evidencia subida correctamente.");
-    } catch (uploadError) {
-      setActionMessage(
-        uploadError instanceof Error ? uploadError.message : "No pudimos subir la evidencia.",
-      );
-    } finally {
-      setIsUploadingEvidence(false);
-    }
-  }
-
   if (isLoading) {
     return (
       <View
@@ -159,12 +119,12 @@ export function MissionDetailScreen() {
           flex: 1,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: isDark ? "#101815" : "#f4f7f3",
+          backgroundColor: isDark ? "#f9f9ff" : "#f9f9ff",
           gap: 12,
         }}
       >
-        <ActivityIndicator color="#28734f" />
-        <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c" }}>
+        <ActivityIndicator color="#2d6a4f" />
+        <Text selectable style={{ color: isDark ? "#b8c7bf" : "#404943" }}>
           Cargando detalle...
         </Text>
       </View>
@@ -177,12 +137,12 @@ export function MissionDetailScreen() {
         style={{
           flex: 1,
           justifyContent: "center",
-          backgroundColor: isDark ? "#101815" : "#f4f7f3",
+          backgroundColor: isDark ? "#f9f9ff" : "#f9f9ff",
           padding: 20,
           gap: 12,
         }}
       >
-        <Text selectable style={{ color: isDark ? "#f3fbf6" : "#17231f", fontWeight: "800" }}>
+        <Text selectable style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontWeight: "800" }}>
           {error ?? "No encontramos esta mision."}
         </Text>
         <Pressable
@@ -193,7 +153,7 @@ export function MissionDetailScreen() {
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 8,
-            backgroundColor: "#28734f",
+            backgroundColor: "#2d6a4f",
           }}
         >
           <Text style={{ color: "#ffffff", fontWeight: "800" }}>Reintentar</Text>
@@ -203,7 +163,7 @@ export function MissionDetailScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: isDark ? "#101815" : "#f4f7f3" }}>
+    <View style={{ flex: 1, backgroundColor: isDark ? "#f9f9ff" : "#f9f9ff" }}>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={{ flex: 1 }}
@@ -234,7 +194,7 @@ export function MissionDetailScreen() {
             <Text
               selectable
               style={{
-                color: isDark ? "#f3fbf6" : "#17231f",
+                color: isDark ? "#f3fbf6" : "#141b2b",
                 fontSize: 25,
                 fontWeight: "900",
                 lineHeight: 30,
@@ -252,17 +212,17 @@ export function MissionDetailScreen() {
           <View
             style={{
               borderRadius: 8,
-              backgroundColor: isDark ? "#123325" : "#d7f8df",
+              backgroundColor: isDark ? "#123325" : "#d8f3dc",
               padding: 16,
               gap: 4,
             }}
           >
-            <Text selectable style={{ color: isDark ? "#b9f2c7" : "#28734f", fontSize: 12 }}>
+            <Text selectable style={{ color: isDark ? "#b9f2c7" : "#2d6a4f", fontSize: 12 }}>
               Recompensa confirmada
             </Text>
             <Text
               selectable
-              style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 18, fontWeight: "900" }}
+              style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 18, fontWeight: "900" }}
             >
               Ganaras {mission.points_reward} pts por participar
             </Text>
@@ -273,19 +233,19 @@ export function MissionDetailScreen() {
               style={{
                 borderRadius: 8,
                 borderWidth: 1,
-                borderColor: isDark ? "#314139" : "#dbe4df",
-                backgroundColor: isDark ? "#17231f" : "#ffffff",
+                borderColor: isDark ? "#314139" : "#d1d5db",
+                backgroundColor: isDark ? "#ffffff" : "#ffffff",
                 padding: 16,
                 gap: 4,
               }}
             >
-              <Text selectable style={{ color: isDark ? "#9fb0a7" : "#63786e", fontSize: 12 }}>
+              <Text selectable style={{ color: isDark ? "#9fb0a7" : "#404943", fontSize: 12 }}>
                 Estado de tu participacion
               </Text>
               <Text
                 selectable
                 style={{
-                  color: isDark ? "#f3fbf6" : "#17231f",
+                  color: isDark ? "#f3fbf6" : "#141b2b",
                   fontSize: 16,
                   fontWeight: "900",
                 }}
@@ -301,18 +261,18 @@ export function MissionDetailScreen() {
             style={{
               borderRadius: 8,
               borderWidth: 1,
-              borderColor: isDark ? "#314139" : "#dbe4df",
-              backgroundColor: isDark ? "#17231f" : "#ffffff",
+              borderColor: isDark ? "#314139" : "#d1d5db",
+              backgroundColor: isDark ? "#ffffff" : "#ffffff",
               padding: 16,
               gap: 4,
             }}
           >
-            <Text selectable style={{ color: isDark ? "#9fb0a7" : "#63786e", fontSize: 12 }}>
+            <Text selectable style={{ color: isDark ? "#9fb0a7" : "#404943", fontSize: 12 }}>
               Organizado por
             </Text>
             <Text
               selectable
-              style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 16, fontWeight: "900" }}
+              style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 16, fontWeight: "900" }}
             >
               {mission.organization_name ?? "Organizacion EcoPoints"}
             </Text>
@@ -321,7 +281,7 @@ export function MissionDetailScreen() {
           <View style={{ gap: 8 }}>
             <Text
               selectable
-              style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 18, fontWeight: "900" }}
+              style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 18, fontWeight: "900" }}
             >
               Descripcion
             </Text>
@@ -336,7 +296,7 @@ export function MissionDetailScreen() {
           <View style={{ gap: 8 }}>
             <Text
               selectable
-              style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 18, fontWeight: "900" }}
+              style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 18, fontWeight: "900" }}
             >
               Que debes llevar?
             </Text>
@@ -351,93 +311,6 @@ export function MissionDetailScreen() {
             ))}
           </View>
 
-          {isRegistered && mission.requires_evidence ? (
-            <View
-              style={{
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: isDark ? "#314139" : "#dbe4df",
-                backgroundColor: isDark ? "#17231f" : "#ffffff",
-                padding: 16,
-                gap: 12,
-              }}
-            >
-              <View style={{ gap: 4 }}>
-                <Text
-                  selectable
-                  style={{
-                    color: isDark ? "#f3fbf6" : "#17231f",
-                    fontSize: 18,
-                    fontWeight: "900",
-                  }}
-                >
-                  Subir evidencia
-                </Text>
-                <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 13 }}>
-                  Pega un enlace a una foto o archivo que demuestre tu participacion.
-                </Text>
-              </View>
-
-              <TextInput
-                autoCapitalize="none"
-                onChangeText={setEvidenceUrl}
-                placeholder="https://..."
-                placeholderTextColor={isDark ? "#89958f" : "#7b8982"}
-                style={{
-                  minHeight: 48,
-                  borderRadius: 8,
-                  borderWidth: 1,
-                  borderColor: isDark ? "#314139" : "#d4ddd8",
-                  backgroundColor: isDark ? "#101815" : "#f7faf8",
-                  color: isDark ? "#ffffff" : "#17231f",
-                  paddingHorizontal: 12,
-                  fontSize: 14,
-                }}
-                value={evidenceUrl}
-              />
-
-              <TextInput
-                multiline
-                onChangeText={setEvidenceDescription}
-                placeholder="Descripcion opcional"
-                placeholderTextColor={isDark ? "#89958f" : "#7b8982"}
-                style={{
-                  minHeight: 78,
-                  borderRadius: 8,
-                  borderWidth: 1,
-                  borderColor: isDark ? "#314139" : "#d4ddd8",
-                  backgroundColor: isDark ? "#101815" : "#f7faf8",
-                  color: isDark ? "#ffffff" : "#17231f",
-                  padding: 12,
-                  fontSize: 14,
-                  textAlignVertical: "top",
-                }}
-                value={evidenceDescription}
-              />
-
-              <Pressable
-                accessibilityRole="button"
-                disabled={isUploadingEvidence}
-                onPress={handleEvidenceSubmit}
-                style={{
-                  minHeight: 46,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: 8,
-                  backgroundColor: isUploadingEvidence ? "#90a79b" : "#28734f",
-                }}
-              >
-                {isUploadingEvidence ? (
-                  <ActivityIndicator color="#ffffff" />
-                ) : (
-                  <Text style={{ color: "#ffffff", fontSize: 14, fontWeight: "900" }}>
-                    Enviar evidencia
-                  </Text>
-                )}
-              </Pressable>
-            </View>
-          ) : null}
-
           {actionMessage ? (
             <View
               style={{
@@ -445,10 +318,10 @@ export function MissionDetailScreen() {
                 backgroundColor: isRegistered
                   ? isDark
                     ? "#123325"
-                    : "#d7f8df"
+                    : "#d8f3dc"
                   : isDark
                     ? "#351d1b"
-                    : "#fff0ee",
+                    : "#ffdad6",
                 padding: 14,
               }}
             >
@@ -461,7 +334,7 @@ export function MissionDetailScreen() {
                       : "#166534"
                     : isDark
                       ? "#ffd9d6"
-                      : "#8c1d18",
+                      : "#93000a",
                   fontSize: 13,
                   fontWeight: "800",
                 }}
@@ -480,9 +353,9 @@ export function MissionDetailScreen() {
           right: 0,
           bottom: 0,
           padding: 14,
-          backgroundColor: isDark ? "#101815" : "#f4f7f3",
+          backgroundColor: isDark ? "#f9f9ff" : "#f9f9ff",
           borderTopWidth: 1,
-          borderTopColor: isDark ? "#26332f" : "#dbe4df",
+          borderTopColor: isDark ? "#26332f" : "#d1d5db",
         }}
       >
         <Pressable
@@ -494,7 +367,7 @@ export function MissionDetailScreen() {
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 8,
-            backgroundColor: isSubmitting ? "#90a79b" : isRegistered ? "#8c1d18" : "#0f5f43",
+            backgroundColor: isSubmitting ? "#90a79b" : isRegistered ? "#93000a" : "#0f5238",
           }}
         >
           {isSubmitting ? (
@@ -513,24 +386,24 @@ export function MissionDetailScreen() {
 }
 
 function InfoPill({ value }: { value: string }) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = false;
 
   return (
     <View
       style={{
         borderRadius: 999,
-        backgroundColor: isDark ? "#1b2823" : "#edf3ef",
+        backgroundColor: isDark ? "#1b2823" : "#f1f3ff",
         paddingHorizontal: 10,
         paddingVertical: 6,
       }}
     >
       <Text
         selectable
-        style={{ color: isDark ? "#dce8e1" : "#34483e", fontSize: 12, fontWeight: "700" }}
+        style={{ color: isDark ? "#dce8e1" : "#404943", fontSize: 12, fontWeight: "700" }}
       >
         {value}
       </Text>
     </View>
   );
 }
+
