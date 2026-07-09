@@ -18,6 +18,7 @@ import {
   type UserProfile,
   updateMyProfile,
 } from "@/services/user-service";
+import { getLevelProgress } from "@/utils/level";
 
 const palette = {
   background: "#f9f9ff",
@@ -158,7 +159,8 @@ export function ProfileScreen() {
     [activeProfile.completed_missions],
   );
 
-  const level = Math.max(1, Math.floor(activeProfile.total_points_earned / 500) + 1);
+  const levelInfo = useMemo(() => getLevelProgress(activeProfile.points), [activeProfile.points]);
+
   async function handleSave() {
     if (!token) {
       setMessage("Inicia sesion nuevamente para actualizar tu perfil.");
@@ -267,7 +269,7 @@ export function ProfileScreen() {
                 }}
               >
                 <Text style={{ color: palette.primary, fontSize: 11, fontWeight: "900" }}>
-                  Guardian Verde
+                  {levelInfo.current.name}
                 </Text>
               </View>
             </View>
@@ -275,7 +277,7 @@ export function ProfileScreen() {
 
           <View style={{ flexDirection: "row", gap: 8 }}>
             <StatCard label="Puntos" value={formatNumber(activeProfile.points)} />
-            <StatCard label="Actual" value={`Nivel ${level}`} />
+            <StatCard label="Actual" value={`Nivel ${levelInfo.levelNumber}`} />
             <StatCard label="Nacional" value="#23" accent="blue" />
           </View>
 
