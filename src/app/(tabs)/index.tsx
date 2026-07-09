@@ -1,5 +1,5 @@
-import { EmptyTabScreen } from "@/components/tabs/empty-tab-screen";
+import { HomeScreen } from "@/screens/home/home-screen";
 
 export default function InicioScreen() {
-  return <EmptyTabScreen label="Inicio" />;
+  return <HomeScreen />;
 }
