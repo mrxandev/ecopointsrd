@@ -62,7 +62,7 @@ export function ProfileScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [form, setForm] = useState<EditableProfile>({
     first_name: "",
@@ -77,7 +77,7 @@ export function ProfileScreen() {
   const loadProfile = useCallback(
     async (mode: "initial" | "refresh" = "initial") => {
       if (!token) {
-        setError("Inicia sesion nuevamente para cargar tu perfil.");
+        setError(new Error("Inicia sesion nuevamente para cargar tu perfil."));
         setIsLoading(false);
         return;
       }
@@ -115,7 +115,7 @@ export function ProfileScreen() {
         });
       } catch (profileError) {
         setError(
-          profileError instanceof Error ? profileError.message : "No pudimos cargar tu perfil.",
+          profileError instanceof Error ? profileError : new Error("No pudimos cargar tu perfil."),
         );
       } finally {
         setIsLoading(false);
@@ -210,9 +210,11 @@ export function ProfileScreen() {
 
       {!isLoading && error ? (
         <StateCard
-          title={error}
-          actionLabel="Reintentar"
-          onAction={() => void loadProfile()}
+          title={error.message}
+          actionLabel={error.name === "401" || error.name === "403" ? "Iniciar sesión otra vez" : "Reintentar"}
+          onAction={() =>
+            error.name === "401" || error.name === "403" ? void logout() : void loadProfile()
+          }
           danger
         />
       ) : null}

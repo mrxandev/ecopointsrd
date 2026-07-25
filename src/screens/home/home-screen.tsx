@@ -30,7 +30,7 @@ function getGreetingName(profile: UserProfile | null, fallbackEmail?: string) {
 }
 
 export function HomeScreen() {
-  const { token, user } = useAuth();
+  const { logout, token, user } = useAuth();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
 
@@ -38,7 +38,7 @@ export function HomeScreen() {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   const loadHome = useCallback(
     async (mode: "initial" | "refresh" = "initial") => {
@@ -58,7 +58,7 @@ export function HomeScreen() {
         setMissions(nextMissions);
       } catch (loadError) {
         setError(
-          loadError instanceof Error ? loadError.message : "No pudimos cargar tu inicio.",
+          loadError instanceof Error ? loadError : new Error("No pudimos cargar tu inicio."),
         );
       } finally {
         setIsLoading(false);
@@ -79,6 +79,7 @@ export function HomeScreen() {
   }, [loadHome]);
 
   const points = profile?.points ?? 0;
+  const isSessionExpired = error?.name === "401" || error?.name === "403";
   const levelInfo = useMemo(() => getLevelProgress(points), [points]);
 
   const recommendedMissions = useMemo(
@@ -139,11 +140,11 @@ export function HomeScreen() {
           }}
         >
           <Text selectable style={{ color: isDark ? "#ffd9d6" : "#8c1d18", fontWeight: "700" }}>
-            {error}
+            {error.message}
           </Text>
           <Pressable
             accessibilityRole="button"
-            onPress={() => void loadHome()}
+            onPress={() => (isSessionExpired ? void logout() : void loadHome())}
             style={{
               minHeight: 42,
               alignItems: "center",
@@ -152,7 +153,9 @@ export function HomeScreen() {
               backgroundColor: "#28734f",
             }}
           >
-            <Text style={{ color: "#ffffff", fontWeight: "800" }}>Reintentar</Text>
+            <Text style={{ color: "#ffffff", fontWeight: "800" }}>
+              {isSessionExpired ? "Iniciar sesión otra vez" : "Reintentar"}
+            </Text>
           </Pressable>
         </View>
       ) : null}

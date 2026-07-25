@@ -17,7 +17,9 @@ export async function openCenterInMaps(center: RecyclingCenter) {
         .filter(Boolean)
         .join(", ");
 
-  const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  const url = hasCoordinates(center)
+    ? `https://www.openstreetmap.org/?mlat=${Number(center.latitude)}&mlon=${Number(center.longitude)}#map=18/${Number(center.latitude)}/${Number(center.longitude)}`
+    : `https://www.openstreetmap.org/search?query=${encodeURIComponent(query)}`;
 
   await Linking.openURL(url);
 }

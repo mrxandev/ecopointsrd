@@ -1,30 +1,181 @@
-import { Text, View } from "react-native";
+import { createElement, useMemo } from "react";
+import { StyleSheet, View } from "react-native";
 
+import { getCenterLocation } from "@/screens/recycling/recycling-utils";
 import type { RecyclingCenter } from "@/services/recycling-service";
+
+type MapCenter = {
+  id: string;
+  latitude: number;
+  location: string;
+  longitude: number;
+  name: string;
+};
 
 export function CentersMap({
   centers,
+  focusedCenterId,
 }: {
   centers: RecyclingCenter[];
   focusedCenterId?: string | null;
 }) {
+  const mapCenters = useMemo(() => getMapCenters(centers), [centers]);
+  const html = useMemo(
+    () => getMapHtml(mapCenters, focusedCenterId),
+    [focusedCenterId, mapCenters],
+  );
+
   return (
-    <View
-      style={{
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#d8f3dc",
-        padding: 20,
-      }}
-    >
-      <Text selectable style={{ color: "#166534", fontWeight: "900", textAlign: "center" }}>
-        Mapa disponible en iOS y Android
-      </Text>
-      <Text selectable style={{ color: "#2d6a4f", marginTop: 6, textAlign: "center" }}>
-        {centers.length} centros con coordenadas listas para ubicarse.
-      </Text>
+    <View style={styles.container}>
+      {createElement("iframe", {
+        srcDoc: html,
+        style: iframeStyle,
+        title: "Mapa de centros de reciclaje",
+      })}
     </View>
   );
 }
 
+function getMapCenters(centers: RecyclingCenter[]): MapCenter[] {
+  return centers
+    .map((center) => ({
+      id: center.id,
+      latitude: Number(center.latitude),
+      location: getCenterLocation(center),
+      longitude: Number(center.longitude),
+      name: center.name,
+    }))
+    .filter(
+      (center) => Number.isFinite(center.latitude) && Number.isFinite(center.longitude),
+    );
+}
+
+function getMapHtml(centers: MapCenter[], focusedCenterId?: string | null) {
+  const safeCenters = JSON.stringify(centers).replace(/</g, "\\u003c");
+  const safeFocusedCenterId = JSON.stringify(focusedCenterId ?? null).replace(/</g, "\\u003c");
+
+  return `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIINfQhtHr6e+0tDiZtdEaQ+4v0gb7F4fb4="
+      crossorigin=""
+    />
+    <style>
+      html,
+      body,
+      #map {
+        height: 100%;
+        margin: 0;
+        width: 100%;
+      }
+
+      body {
+        background: #eef4ef;
+        overflow: hidden;
+      }
+
+      .leaflet-container {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .popup-title {
+        color: #0b5f46;
+        font-size: 13px;
+        font-weight: 800;
+        margin-bottom: 3px;
+      }
+
+      .popup-location {
+        color: #30483d;
+        font-size: 12px;
+        line-height: 1.35;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script>
+      const centers = ${safeCenters};
+      const focusedCenterId = ${safeFocusedCenterId};
+      const map = L.map("map", {
+        attributionControl: true,
+        dragging: true,
+        tap: true,
+        touchZoom: true,
+        zoomControl: true
+      }).setView([18.7357, -70.1627], 8);
+
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+        maxZoom: 19
+      }).addTo(map);
+
+      const bounds = [];
+      const markersById = {};
+
+      function escapeHtml(value) {
+        return String(value || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      centers.forEach((center) => {
+        const point = [center.latitude, center.longitude];
+        bounds.push(point);
+        const marker = L.marker(point)
+          .addTo(map)
+          .bindPopup(
+            '<div class="popup-title">' +
+              escapeHtml(center.name) +
+              '</div><div class="popup-location">' +
+              escapeHtml(center.location) +
+              "</div>"
+          );
+        markersById[center.id] = marker;
+      });
+
+      const focusedMarker = focusedCenterId ? markersById[focusedCenterId] : null;
+
+      if (focusedMarker) {
+        const point = focusedMarker.getLatLng();
+        map.setView(point, 15, { animate: false });
+        focusedMarker.openPopup();
+      } else if (bounds.length > 1) {
+        map.fitBounds(bounds, { padding: [28, 28] });
+      } else if (bounds.length === 1) {
+        map.setView(bounds[0], 14);
+      }
+
+      window.setTimeout(() => map.invalidateSize(false), 80);
+    </script>
+  </body>
+</html>`;
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
+
+const iframeStyle = {
+  border: 0,
+  height: "100%",
+  width: "100%",
+};

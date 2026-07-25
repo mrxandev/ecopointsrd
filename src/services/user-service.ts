@@ -72,6 +72,12 @@ function getApiMessage(data: unknown, fallback: string) {
   return fallback;
 }
 
+function createApiError(data: unknown, fallback: string, status: number) {
+  const error = new Error(getApiMessage(data, fallback));
+  error.name = String(status);
+  return error;
+}
+
 function authHeaders(token: string) {
   return {
     Accept: "application/json",
@@ -86,7 +92,7 @@ export async function getMyProfile(token: string) {
   const data = (await response.json().catch(() => null)) as ProfileResponse | null;
 
   if (!response.ok) {
-    throw new Error(getApiMessage(data, "No pudimos cargar tu perfil."));
+    throw createApiError(data, "No pudimos cargar tu perfil.", response.status);
   }
 
   if (!data?.data?.user) {
@@ -116,7 +122,7 @@ export async function updateMyProfile(
   const data = (await response.json().catch(() => null)) as ProfileResponse | null;
 
   if (!response.ok) {
-    throw new Error(getApiMessage(data, "No pudimos actualizar tu perfil."));
+    throw createApiError(data, "No pudimos actualizar tu perfil.", response.status);
   }
 
   if (!data?.data?.user) {
@@ -133,7 +139,7 @@ export async function getMyPoints(token: string) {
   const data = (await response.json().catch(() => null)) as PointsResponse | null;
 
   if (!response.ok) {
-    throw new Error(getApiMessage(data, "No pudimos cargar tus puntos."));
+    throw createApiError(data, "No pudimos cargar tus puntos.", response.status);
   }
 
   return data?.data ?? { points: 0, total_points_earned: 0, total_points_redeemed: 0 };
@@ -146,7 +152,7 @@ export async function getMyPointTransactions(token: string) {
   const data = (await response.json().catch(() => null)) as TransactionsResponse | null;
 
   if (!response.ok) {
-    throw new Error(getApiMessage(data, "No pudimos cargar tu historial de puntos."));
+    throw createApiError(data, "No pudimos cargar tu historial de puntos.", response.status);
   }
 
   return data?.data?.transactions ?? [];
