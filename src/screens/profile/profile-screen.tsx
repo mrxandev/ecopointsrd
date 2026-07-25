@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/use-auth";
 import {
   getMyPoints,
   getMyProfile,
+  getUserRanking,
   type UserProfile,
   updateMyProfile,
 } from "@/services/user-service";
@@ -64,6 +65,7 @@ export function ProfileScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [nationalRank, setNationalRank] = useState<number | null>(null);
   const [form, setForm] = useState<EditableProfile>({
     first_name: "",
     last_name: "",
@@ -91,9 +93,10 @@ export function ProfileScreen() {
       try {
         setError(null);
         setMessage(null);
-        const [nextProfile, nextPoints] = await Promise.all([
+        const [nextProfile, nextPoints, ranking] = await Promise.all([
           getMyProfile(token),
           getMyPoints(token),
+          getUserRanking(token).catch(() => ({ users: [], currentUserRank: null })),
         ]);
         const mergedProfile = {
           ...nextProfile,
@@ -104,6 +107,11 @@ export function ProfileScreen() {
         };
 
         setProfile(mergedProfile);
+        setNationalRank(
+          ranking.currentUserRank ??
+            ranking.users.find((rankingUser) => rankingUser.id === mergedProfile.id)?.rank ??
+            null,
+        );
         setForm({
           first_name: mergedProfile.first_name ?? "",
           last_name: mergedProfile.last_name ?? "",
@@ -280,7 +288,11 @@ export function ProfileScreen() {
           <View style={{ flexDirection: "row", gap: 8 }}>
             <StatCard label="Puntos" value={formatNumber(activeProfile.points)} />
             <StatCard label="Actual" value={`Nivel ${levelInfo.levelNumber}`} />
-            <StatCard label="Nacional" value="#23" accent="blue" />
+            <StatCard
+              label="Nacional"
+              value={nationalRank ? `#${formatNumber(nationalRank)}` : "--"}
+              accent="blue"
+            />
           </View>
 
           <View
@@ -360,6 +372,9 @@ export function ProfileScreen() {
             </Link>
             <Link href="/point-history" asChild>
               <MenuRow label="Historial de puntos" icon="history" />
+            </Link>
+            <Link href="/ranking" asChild>
+              <MenuRow label="Ranking nacional" icon="ranking" />
             </Link>
             <MenuRow label="Privacidad" icon="privacy" />
             <MenuRow label="Cerrar sesion" icon="logout" danger onPress={logout} />
@@ -508,7 +523,7 @@ function MenuRow({
   );
 }
 
-type MenuIconName = "edit" | "history" | "logout" | "privacy" | "rewards";
+type MenuIconName = "edit" | "history" | "logout" | "privacy" | "ranking" | "rewards";
 
 function MenuIcon({ color, name }: { color: string; name: MenuIconName }) {
   const stroke = { borderColor: color };
@@ -605,6 +620,16 @@ function MenuIcon({ color, name }: { color: string; name: MenuIconName }) {
         />
         <View style={{ position: "absolute", top: 6, width: 3, height: 3, borderRadius: 99, backgroundColor: color }} />
         <View style={{ position: "absolute", top: 9, width: 1.5, height: 4, backgroundColor: color }} />
+      </View>
+    );
+  }
+
+  if (name === "ranking") {
+    return (
+      <View style={{ width: 18, height: 18, flexDirection: "row", alignItems: "flex-end", gap: 2 }}>
+        <View style={{ width: 4, height: 8, borderRadius: 1.5, backgroundColor: color }} />
+        <View style={{ width: 4, height: 15, borderRadius: 1.5, backgroundColor: color }} />
+        <View style={{ width: 4, height: 11, borderRadius: 1.5, backgroundColor: color }} />
       </View>
     );
   }

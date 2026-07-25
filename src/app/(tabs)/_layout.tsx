@@ -4,7 +4,7 @@ import { type ColorValue, View } from "react-native";
 
 import { AppTopBarTitle } from "@/components/navigation/app-top-bar-title";
 
-type TabIconName = "home" | "map" | "missions" | "rewards" | "profile";
+type TabIconName = "home" | "map" | "missions" | "ranking" | "rewards" | "profile";
 
 const ACTIVE_COLOR = "#2d6a4f";
 const INACTIVE_COLOR = "#34424a";
@@ -18,6 +18,7 @@ const TAB_ITEMS: {
   { name: "index", title: "Inicio", icon: "home" },
   { name: "mapa", title: "Mapa", icon: "map" },
   { name: "misiones", title: "Misiones", icon: "missions" },
+  { name: "ranking", title: "Ranking", icon: "ranking" },
   { name: "recompensas", title: "Recompensas", icon: "rewards" },
   { name: "perfil", title: "Perfil", icon: "profile" },
 ];
@@ -195,6 +196,16 @@ function IconGlyph({
         <View style={{ width: 22, height: 6, borderWidth: 2, borderRadius: 2, ...common }} />
         <View style={{ width: 18, height: 11, borderWidth: 2, borderTopWidth: 0, ...common }} />
         <View style={{ position: "absolute", bottom: 0, width: 2, height: 16, backgroundColor: color }} />
+      </View>
+    );
+  }
+
+  if (name === "ranking") {
+    return (
+      <View style={{ width: 24, height: 22, flexDirection: "row", alignItems: "flex-end", gap: 3 }}>
+        <View style={{ width: 5, height: 10, borderRadius: 2, backgroundColor: color }} />
+        <View style={{ width: 5, height: 18, borderRadius: 2, backgroundColor: color }} />
+        <View style={{ width: 5, height: 14, borderRadius: 2, backgroundColor: color }} />
       </View>
     );
   }
