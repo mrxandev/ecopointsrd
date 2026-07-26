@@ -1,3 +1,4 @@
+import { Image } from "expo-image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -5,32 +6,34 @@ import {
   RefreshControl,
   ScrollView,
   Text,
+  TextInput,
   View,
 } from "react-native";
-import { Image } from "expo-image";
 
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { useAuth } from "@/hooks/use-auth";
 import {
-  getMyRedemptions,
   getRewards,
   redeemReward,
   type Reward,
-  type RewardRedemption,
 } from "@/services/reward-service";
 import { getMyPoints } from "@/services/user-service";
 
-const VIEWS = ["Disponibles", "Mis canjes"] as const;
+const FALLBACK_REWARD_IMAGES = [
+  "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=700&q=80",
+  "https://images.unsplash.com/photo-1534723452862-4c874018d66d?auto=format&fit=crop&w=700&q=80",
+  "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=700&q=80",
+];
 
 export function RewardsScreen() {
   const { token } = useAuth();
-  const isDark = false;
-  const [view, setView] = useState<(typeof VIEWS)[number]>("Disponibles");
   const [rewards, setRewards] = useState<Reward[]>([]);
-  const [redemptions, setRedemptions] = useState<RewardRedemption[]>([]);
   const [points, setPoints] = useState(0);
+  const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [redeemingId, setRedeemingId] = useState<string | null>(null);
+  const [rewardToRedeem, setRewardToRedeem] = useState<Reward | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,13 +48,11 @@ export function RewardsScreen() {
       try {
         setError(null);
         setMessage(null);
-        const [nextRewards, nextRedemptions, nextPoints] = await Promise.all([
+        const [nextRewards, nextPoints] = await Promise.all([
           getRewards(),
-          token ? getMyRedemptions(token) : Promise.resolve([]),
           token ? getMyPoints(token) : Promise.resolve({ points: 0 }),
         ]);
         setRewards(nextRewards);
-        setRedemptions(nextRedemptions);
         setPoints(nextPoints.points ?? 0);
       } catch (rewardError) {
         setError(
@@ -80,6 +81,24 @@ export function RewardsScreen() {
     [rewards],
   );
 
+  const filteredRewards = useMemo(() => {
+    const cleanQuery = query.trim().toLowerCase();
+
+    if (!cleanQuery) {
+      return sortedRewards;
+    }
+
+    return sortedRewards.filter((reward) =>
+      [reward.title, reward.description]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(cleanQuery),
+    );
+  }, [query, sortedRewards]);
+
+  const popularRewards = filteredRewards.slice(0, 5);
+
   async function handleRedeem(reward: Reward) {
     if (!token) {
       setMessage("Inicia sesion nuevamente para canjear.");
@@ -101,215 +120,421 @@ export function RewardsScreen() {
   }
 
   return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
-      refreshControl={
-        <RefreshControl refreshing={isRefreshing} onRefresh={() => void loadRewards("refresh")} />
-      }
-      style={{ flex: 1, backgroundColor: isDark ? "#f9f9ff" : "#f9f9ff" }}
-      contentContainerStyle={{ padding: 16, paddingBottom: 92, gap: 16 }}
-    >
-      <View style={{ gap: 4 }}>
-        <Text
-          selectable
-          style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 28, fontWeight: "900" }}
+    <>
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={() => void loadRewards("refresh")} />
+        }
+        style={{ flex: 1, backgroundColor: "#f7f7fb" }}
+        contentContainerStyle={{ padding: 12, paddingBottom: 92, gap: 14 }}
+      >
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <View style={{ width: 18, height: 18, borderRadius: 999, backgroundColor: "#0f6b4b", alignItems: "center", justifyContent: "center" }}>
+            <Text style={{ color: "#ffffff", fontSize: 11, fontWeight: "900" }}>E</Text>
+          </View>
+          <Text style={{ color: "#0b5f46", fontSize: 13, fontWeight: "900" }}>EcoPoints RD</Text>
+        </View>
+        <View
+          style={{
+            minHeight: 28,
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 999,
+            backgroundColor: "#d8f3dc",
+            paddingHorizontal: 10,
+          }}
         >
-          Recompensas
-        </Text>
-        <Text selectable style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 14 }}>
-          Tienes {new Intl.NumberFormat("es-DO").format(points)} puntos disponibles.
-        </Text>
+          <Text style={{ color: "#0f5238", fontSize: 11, fontWeight: "900" }}>
+            {new Intl.NumberFormat("es-DO").format(points)} pts
+          </Text>
+        </View>
       </View>
 
-      <View
-        style={{
-          flexDirection: "row",
-          borderRadius: 8,
-          backgroundColor: isDark ? "#ffffff" : "#ffffff",
-          borderWidth: 1,
-          borderColor: isDark ? "#314139" : "#d1d5db",
-          padding: 4,
-        }}
-      >
-        {VIEWS.map((item) => {
-          const isActive = item === view;
-
-          return (
-            <Pressable
-              accessibilityRole="button"
-              key={item}
-              onPress={() => setView(item)}
-              style={{
-                flex: 1,
-                minHeight: 38,
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: 6,
-                backgroundColor: isActive ? "#2d6a4f" : "transparent",
-              }}
-            >
-              <Text
-                style={{
-                  color: isActive ? "#ffffff" : isDark ? "#dce8e1" : "#404943",
-                  fontSize: 13,
-                  fontWeight: "800",
-                }}
-              >
-                {item}
-              </Text>
-            </Pressable>
-          );
-        })}
+      <View style={{ gap: 9 }}>
+        <Text selectable style={{ color: "#0b5f46", fontSize: 25, fontWeight: "900" }}>
+          Recompensas
+        </Text>
+        <View
+          style={{
+            minHeight: 46,
+            alignItems: "center",
+            borderRadius: 8,
+            backgroundColor: "#ffffff",
+            borderWidth: 1,
+            borderColor: "#9aa8a0",
+            flexDirection: "row",
+            paddingHorizontal: 12,
+          }}
+        >
+          <SearchIcon />
+          <TextInput
+            autoCapitalize="words"
+            onChangeText={setQuery}
+            placeholder="Buscar recompensas..."
+            placeholderTextColor="#9ca6a0"
+            style={{ color: "#141b2b", flex: 1, fontSize: 13, minHeight: 44, marginLeft: 8 }}
+            value={query}
+          />
+        </View>
       </View>
 
       {isLoading ? (
         <View style={{ minHeight: 280, alignItems: "center", justifyContent: "center", gap: 12 }}>
           <ActivityIndicator color="#2d6a4f" />
-          <Text selectable style={{ color: isDark ? "#b8c7bf" : "#404943" }}>
+          <Text selectable style={{ color: "#404943" }}>
             Cargando recompensas...
           </Text>
         </View>
       ) : null}
 
-      {!isLoading && error ? (
-        <MessageCard message={error} danger />
+      {!isLoading && error ? <MessageCard message={error} danger /> : null}
+
+      {!isLoading && message ? (
+        <MessageCard
+          message={message}
+          danger={message.includes("No pudimos") || message.includes("insuficientes")}
+        />
       ) : null}
 
-      {!isLoading && message ? <MessageCard message={message} danger={message.includes("No pudimos") || message.includes("insuficientes")} /> : null}
+      {!isLoading && !error && popularRewards.length > 0 ? (
+        <View style={{ gap: 9 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+            <Text selectable style={{ color: "#141b2b", fontSize: 15, fontWeight: "900" }}>
+              Mas populares
+            </Text>
+            <Text selectable style={{ color: "#0f6b4b", fontSize: 10, fontWeight: "900" }}>
+              Ver todas
+            </Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={{ flexDirection: "row", gap: 12, paddingRight: 12 }}>
+              {popularRewards.map((reward, index) => (
+                <PopularRewardCard
+                  key={reward.id}
+                  index={index}
+                  points={points}
+                  redeemingId={redeemingId}
+                  reward={reward}
+                  onRedeem={() => setRewardToRedeem(reward)}
+                />
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+      ) : null}
 
-      {!isLoading && !error && view === "Disponibles"
-        ? sortedRewards.map((reward) => (
-            <RewardCard
+      {!isLoading && !error ? (
+        <View style={{ gap: 10 }}>
+          <Text selectable style={{ color: "#141b2b", fontSize: 15, fontWeight: "900" }}>
+            Todas las opciones
+          </Text>
+          {filteredRewards.map((reward, index) => (
+            <RewardOptionCard
               key={reward.id}
+              index={index}
               points={points}
               redeemingId={redeemingId}
               reward={reward}
-              onRedeem={() => void handleRedeem(reward)}
+              onRedeem={() => setRewardToRedeem(reward)}
             />
-          ))
-        : null}
+          ))}
+        </View>
+      ) : null}
 
-      {!isLoading && !error && view === "Mis canjes"
-        ? redemptions.map((redemption) => (
-            <RedemptionCard key={redemption.id} redemption={redemption} />
-          ))
-        : null}
-
-      {!isLoading &&
-      !error &&
-      ((view === "Disponibles" && sortedRewards.length === 0) ||
-        (view === "Mis canjes" && redemptions.length === 0)) ? (
+      {!isLoading && !error && filteredRewards.length === 0 ? (
         <View
           style={{
-            minHeight: 220,
+            minHeight: 190,
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 8,
-            backgroundColor: isDark ? "#ffffff" : "#ffffff",
+            backgroundColor: "#ffffff",
             padding: 20,
           }}
         >
-          <Text selectable style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontWeight: "900" }}>
-            {view === "Disponibles" ? "No hay recompensas activas." : "Aun no tienes canjes."}
+          <Text selectable style={{ color: "#141b2b", fontWeight: "900", textAlign: "center" }}>
+            No encontramos recompensas con ese buscador.
           </Text>
         </View>
       ) : null}
-    </ScrollView>
+      </ScrollView>
+      <ConfirmationDialog
+        confirmLabel="Canjear"
+        message={
+          rewardToRedeem
+            ? `Vas a usar ${new Intl.NumberFormat("es-DO").format(
+                rewardToRedeem.points_required,
+              )} puntos para reclamar "${rewardToRedeem.title}".`
+            : ""
+        }
+        onCancel={() => setRewardToRedeem(null)}
+        onConfirm={() => {
+          if (!rewardToRedeem) {
+            return;
+          }
+
+          const nextReward = rewardToRedeem;
+          setRewardToRedeem(null);
+          void handleRedeem(nextReward);
+        }}
+        title="Confirmar canje"
+        visible={!!rewardToRedeem}
+      />
+    </>
   );
 }
 
-function RewardCard({
+function PopularRewardCard({
+  index,
   onRedeem,
   points,
   redeemingId,
   reward,
 }: {
+  index: number;
   onRedeem: () => void;
   points: number;
   redeemingId: string | null;
   reward: Reward;
 }) {
-  const isDark = false;
   const canRedeem = points >= reward.points_required && reward.stock > 0;
 
   return (
     <View
       style={{
+        width: 218,
         overflow: "hidden",
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: isDark ? "#314139" : "#d1d5db",
-        backgroundColor: isDark ? "#ffffff" : "#ffffff",
+        borderColor: "#dce3df",
+        backgroundColor: "#ffffff",
+        boxShadow: "0 3px 10px rgba(20, 27, 43, 0.12)",
       }}
     >
-      {reward.image_url ? (
-        <Image source={reward.image_url} contentFit="cover" style={{ width: "100%", height: 130 }} />
-      ) : null}
-      <View style={{ padding: 14, gap: 10 }}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
-          <Text
-            selectable
-            style={{ flex: 1, color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 16, fontWeight: "900" }}
-          >
-            {reward.title}
-          </Text>
-          <Text selectable style={{ color: "#2d6a4f", fontWeight: "900" }}>
-            {reward.points_required} pts
-          </Text>
-        </View>
-        {reward.description ? (
-          <Text selectable numberOfLines={2} style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 13 }}>
-            {reward.description}
-          </Text>
-        ) : null}
-        <Pressable
-          accessibilityRole="button"
-          disabled={!canRedeem || redeemingId === reward.id}
-          onPress={onRedeem}
-          style={{
-            minHeight: 44,
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 8,
-            backgroundColor: canRedeem ? "#2d6a4f" : "#90a79b",
-          }}
-        >
-          {redeemingId === reward.id ? (
-            <ActivityIndicator color="#ffffff" />
-          ) : (
-            <Text style={{ color: "#ffffff", fontWeight: "900" }}>
-              {reward.stock <= 0 ? "Agotada" : canRedeem ? "Canjear" : "Puntos insuficientes"}
-            </Text>
-          )}
-        </Pressable>
+      <View style={{ minHeight: 112 }}>
+        <Image
+          source={getRewardImage(reward, index)}
+          contentFit="cover"
+          transition={180}
+          style={{ width: "100%", height: 112, backgroundColor: "#e6ece8" }}
+        />
+        <PointsBadge points={reward.points_required} top={8} />
+      </View>
+      <View style={{ padding: 11, gap: 7 }}>
+        <Text selectable numberOfLines={1} style={{ color: "#607068", fontSize: 10, fontWeight: "700" }}>
+          {getRewardCategory(reward)}
+        </Text>
+        <Text selectable numberOfLines={2} style={{ color: "#141b2b", fontSize: 13, fontWeight: "900", lineHeight: 17 }}>
+          {reward.title}
+        </Text>
+        <StockText stock={reward.stock} />
+        <RedeemButton
+          canRedeem={canRedeem}
+          isRedeeming={redeemingId === reward.id}
+          reward={reward}
+          onRedeem={onRedeem}
+          solid
+        />
       </View>
     </View>
   );
 }
 
-function RedemptionCard({ redemption }: { redemption: RewardRedemption }) {
-  const isDark = false;
+function RewardOptionCard({
+  index,
+  onRedeem,
+  points,
+  redeemingId,
+  reward,
+}: {
+  index: number;
+  onRedeem: () => void;
+  points: number;
+  redeemingId: string | null;
+  reward: Reward;
+}) {
+  const canRedeem = points >= reward.points_required && reward.stock > 0;
 
   return (
     <View
       style={{
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: isDark ? "#314139" : "#d1d5db",
-        backgroundColor: isDark ? "#ffffff" : "#ffffff",
+        borderColor: "#e0e7e3",
+        backgroundColor: "#ffffff",
+        boxShadow: "0 2px 8px rgba(20, 27, 43, 0.07)",
         padding: 14,
-        gap: 6,
+        gap: 10,
       }}
     >
-      <Text selectable style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 16, fontWeight: "900" }}>
-        {redemption.title}
+      <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 10 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10, flex: 1 }}>
+          <CategoryIcon index={index} />
+          <View style={{ flex: 1, gap: 4 }}>
+            <Text selectable numberOfLines={1} style={{ color: "#607068", fontSize: 10 }}>
+              {getRewardCategory(reward)}
+            </Text>
+            <Text selectable numberOfLines={2} style={{ color: "#141b2b", fontSize: 13, fontWeight: "900", lineHeight: 17 }}>
+              {reward.title}
+            </Text>
+            <StockText stock={reward.stock} />
+          </View>
+        </View>
+        <PointsBadge points={reward.points_required} />
+      </View>
+      <RedeemButton
+        canRedeem={canRedeem}
+        isRedeeming={redeemingId === reward.id}
+        reward={reward}
+        onRedeem={onRedeem}
+      />
+    </View>
+  );
+}
+
+function StockText({ stock }: { stock: number }) {
+  return (
+    <Text
+      selectable
+      numberOfLines={1}
+      style={{ color: stock > 0 ? "#607068" : "#93000a", fontSize: 10, fontWeight: "800" }}
+    >
+      {stock > 0 ? `${stock} disponibles` : "Sin stock"}
+    </Text>
+  );
+}
+
+function RedeemButton({
+  canRedeem,
+  isRedeeming,
+  onRedeem,
+  reward,
+  solid,
+}: {
+  canRedeem: boolean;
+  isRedeeming: boolean;
+  onRedeem: () => void;
+  reward: Reward;
+  solid?: boolean;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      disabled={!canRedeem || isRedeeming}
+      onPress={onRedeem}
+      style={{
+        minHeight: solid ? 39 : 34,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 7,
+        borderWidth: solid ? 0 : 1,
+        borderColor: canRedeem ? "#0f5238" : "#90a79b",
+        backgroundColor: solid ? (canRedeem ? "#0f5238" : "#90a79b") : "#ffffff",
+      }}
+    >
+      {isRedeeming ? (
+        <ActivityIndicator color={solid ? "#ffffff" : "#0f5238"} />
+      ) : (
+        <Text
+          style={{
+            color: solid ? "#ffffff" : canRedeem ? "#0f5238" : "#607068",
+            fontSize: 11,
+            fontWeight: "900",
+          }}
+        >
+          {reward.stock <= 0 ? "Agotada" : canRedeem ? "Canjear" : "Puntos insuficientes"}
+        </Text>
+      )}
+    </Pressable>
+  );
+}
+
+function PointsBadge({ points, top }: { points: number; top?: number }) {
+  return (
+    <View
+      style={{
+        position: top === undefined ? "relative" : "absolute",
+        right: top === undefined ? undefined : 8,
+        top,
+        alignSelf: "flex-start",
+        borderRadius: 5,
+        backgroundColor: "#d8f3dc",
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+      }}
+    >
+      <Text style={{ color: "#166534", fontSize: 10, fontWeight: "900" }}>
+        {new Intl.NumberFormat("es-DO").format(points)} pts
       </Text>
-      <Text selectable style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 13 }}>
-        {redemption.points_spent} puntos gastados
-      </Text>
-      <Text selectable style={{ color: "#2d6a4f", fontSize: 12, fontWeight: "800" }}>
-        {redemption.status}
-      </Text>
+    </View>
+  );
+}
+
+function CategoryIcon({ index }: { index: number }) {
+  const colors = ["#dceafe", "#e7efff", "#edf1f7", "#f0f8ed"];
+
+  return (
+    <View
+      style={{
+        width: 36,
+        height: 36,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 999,
+        backgroundColor: colors[index % colors.length],
+      }}
+    >
+      <View
+        style={{
+          width: 16,
+          height: 14,
+          borderRadius: 3,
+          borderWidth: 1.4,
+          borderColor: "#4c6785",
+        }}
+      />
+      <View
+        style={{
+          position: "absolute",
+          top: 10,
+          width: 9,
+          height: 5,
+          borderTopLeftRadius: 4,
+          borderTopRightRadius: 4,
+          borderWidth: 1.4,
+          borderBottomWidth: 0,
+          borderColor: "#4c6785",
+        }}
+      />
+    </View>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <View style={{ width: 16, height: 16 }}>
+      <View
+        style={{
+          width: 11,
+          height: 11,
+          borderRadius: 999,
+          borderWidth: 1.5,
+          borderColor: "#6d7b74",
+        }}
+      />
+      <View
+        style={{
+          position: "absolute",
+          right: 1,
+          bottom: 1,
+          width: 6,
+          height: 1.5,
+          backgroundColor: "#6d7b74",
+          transform: [{ rotate: "45deg" }],
+        }}
+      />
     </View>
   );
 }
@@ -330,3 +555,24 @@ function MessageCard({ danger, message }: { danger?: boolean; message: string })
   );
 }
 
+function getRewardImage(reward: Reward, index: number) {
+  return reward.image_url || FALLBACK_REWARD_IMAGES[index % FALLBACK_REWARD_IMAGES.length];
+}
+
+function getRewardCategory(reward: Reward) {
+  const text = `${reward.title} ${reward.description ?? ""}`.toLowerCase();
+
+  if (text.includes("supermercado") || text.includes("mercado")) {
+    return "Supermercados";
+  }
+
+  if (text.includes("metro") || text.includes("transporte") || text.includes("recarga")) {
+    return "Transporte";
+  }
+
+  if (text.includes("libro") || text.includes("educacion") || text.includes("libreria")) {
+    return "Educacion";
+  }
+
+  return "Recompensa";
+}

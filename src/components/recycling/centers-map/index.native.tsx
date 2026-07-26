@@ -2,30 +2,28 @@ import { useMemo, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { WebView } from "react-native-webview";
 
-import { getCenterLocation } from "@/screens/recycling/recycling-utils";
-import type { RecyclingCenter } from "@/services/recycling-service";
-
-type MapCenter = {
+export type MapActivity = {
   id: string;
+  kind: "center" | "mission";
   latitude: number;
   location: string;
   longitude: number;
   name: string;
+  subtitle: string;
 };
 
 export function CentersMap({
-  centers,
-  focusedCenterId,
+  activities,
+  focusedActivityId,
 }: {
-  centers: RecyclingCenter[];
-  focusedCenterId?: string | null;
+  activities: MapActivity[];
+  focusedActivityId?: string | null;
 }) {
   const webViewRef = useRef<WebView>(null);
   const [errorHtml, setErrorHtml] = useState<string | null>(null);
-  const mapCenters = useMemo(() => getMapCenters(centers), [centers]);
   const html = useMemo(
-    () => getMapHtml(mapCenters, focusedCenterId),
-    [focusedCenterId, mapCenters],
+    () => getMapHtml(activities, focusedActivityId),
+    [activities, focusedActivityId],
   );
 
   const hasLoadError = errorHtml === html;
@@ -58,23 +56,9 @@ export function CentersMap({
   );
 }
 
-function getMapCenters(centers: RecyclingCenter[]): MapCenter[] {
-  return centers
-    .map((center) => ({
-      id: center.id,
-      latitude: Number(center.latitude),
-      location: getCenterLocation(center),
-      longitude: Number(center.longitude),
-      name: center.name,
-    }))
-    .filter(
-      (center) => Number.isFinite(center.latitude) && Number.isFinite(center.longitude),
-    );
-}
-
-function getMapHtml(centers: MapCenter[], focusedCenterId?: string | null) {
-  const safeCenters = JSON.stringify(centers).replace(/</g, "\\u003c");
-  const safeFocusedCenterId = JSON.stringify(focusedCenterId ?? null).replace(/</g, "\\u003c");
+function getMapHtml(activities: MapActivity[], focusedActivityId?: string | null) {
+  const safeActivities = JSON.stringify(activities).replace(/</g, "\\u003c");
+  const safeFocusedActivityId = JSON.stringify(focusedActivityId ?? null).replace(/</g, "\\u003c");
 
   return `<!doctype html>
 <html>
@@ -84,8 +68,24 @@ function getMapHtml(centers: MapCenter[], focusedCenterId?: string | null) {
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     <style>
       html, body, #map { height: 100%; margin: 0; padding: 0; width: 100%; }
-      body { background: #eef4ef; overflow: hidden; }
+      body { background: #f8eeb6; overflow: hidden; }
       .leaflet-container { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .activity-marker {
+        align-items: center;
+        border: 2px solid #fff;
+        border-radius: 999px;
+        box-shadow: 0 7px 18px rgba(21, 35, 28, 0.22);
+        color: #fff;
+        display: flex;
+        font-size: 15px;
+        font-weight: 900;
+        height: 30px;
+        justify-content: center;
+        width: 30px;
+      }
+      .activity-marker.center { background: #1f7a5a; }
+      .activity-marker.mission { background: #2f69b2; }
+      .popup-type { color: #2d6a4f; font-size: 11px; font-weight: 800; margin-bottom: 3px; text-transform: uppercase; }
       .popup-title { color: #0b5f46; font-size: 13px; font-weight: 800; margin-bottom: 3px; }
       .popup-location { color: #30483d; font-size: 12px; line-height: 1.35; }
     </style>
@@ -94,8 +94,8 @@ function getMapHtml(centers: MapCenter[], focusedCenterId?: string | null) {
     <div id="map"></div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script>
-      const centers = ${safeCenters};
-      const focusedCenterId = ${safeFocusedCenterId};
+      const activities = ${safeActivities};
+      const focusedActivityId = ${safeFocusedActivityId};
 
       function escapeHtml(value) {
         return String(value || "")
@@ -112,7 +112,7 @@ function getMapHtml(centers: MapCenter[], focusedCenterId?: string | null) {
           return;
         }
 
-        const map = L.map("map", { tap: true, zoomControl: true }).setView([18.7357, -70.1627], 8);
+        const map = L.map("map", { tap: true, zoomControl: false }).setView([18.7357, -70.1627], 8);
         window.mapInstance = map;
         L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: "&copy; OpenStreetMap contributors",
@@ -122,22 +122,30 @@ function getMapHtml(centers: MapCenter[], focusedCenterId?: string | null) {
 
         const bounds = [];
         const markersById = {};
-        centers.forEach((center) => {
-          const point = [center.latitude, center.longitude];
+        activities.forEach((activity) => {
+          const point = [activity.latitude, activity.longitude];
           bounds.push(point);
-          const marker = L.marker(point).addTo(map).bindPopup(
-            '<div class="popup-title">' + escapeHtml(center.name) + '</div>' +
-            '<div class="popup-location">' + escapeHtml(center.location) + '</div>'
+          const marker = L.marker(point, {
+            icon: L.divIcon({
+              className: "",
+              html: '<div class="activity-marker ' + activity.kind + '">' + (activity.kind === "mission" ? "M" : "R") + '</div>',
+              iconAnchor: [15, 15],
+              popupAnchor: [0, -14]
+            })
+          }).addTo(map).bindPopup(
+            '<div class="popup-type">' + (activity.kind === "mission" ? "Mision" : "Centro de reciclaje") + '</div>' +
+            '<div class="popup-title">' + escapeHtml(activity.name) + '</div>' +
+            '<div class="popup-location">' + escapeHtml(activity.location || activity.subtitle) + '</div>'
           );
-          markersById[center.id] = marker;
+          markersById[activity.id] = marker;
         });
 
-        const focusedMarker = focusedCenterId ? markersById[focusedCenterId] : null;
+        const focusedMarker = focusedActivityId ? markersById[focusedActivityId] : null;
         if (focusedMarker) {
           map.setView(focusedMarker.getLatLng(), 15, { animate: false });
           focusedMarker.openPopup();
         } else if (bounds.length > 1) {
-          map.fitBounds(bounds, { padding: [28, 28] });
+          map.fitBounds(bounds, { padding: [34, 34] });
         } else if (bounds.length === 1) {
           map.setView(bounds[0], 14, { animate: false });
         }

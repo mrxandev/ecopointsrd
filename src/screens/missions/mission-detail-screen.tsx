@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { useAuth } from "@/hooks/use-auth";
 import {
   formatMissionDate,
@@ -31,6 +32,7 @@ export function MissionDetailScreen() {
   const [isRegistered, setIsRegistered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConfirmingAction, setIsConfirmingAction] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
@@ -361,7 +363,7 @@ export function MissionDetailScreen() {
         <Pressable
           accessibilityRole="button"
           disabled={isSubmitting}
-          onPress={handleRegistrationToggle}
+          onPress={() => setIsConfirmingAction(true)}
           style={{
             minHeight: 52,
             alignItems: "center",
@@ -381,6 +383,22 @@ export function MissionDetailScreen() {
           )}
         </Pressable>
       </View>
+      <ConfirmationDialog
+        confirmLabel={isRegistered ? "Salir" : "Inscribirme"}
+        danger={isRegistered}
+        message={
+          isRegistered
+            ? `Vas a salir de "${mission.title}". Si cambias de opinion, podras inscribirte de nuevo si sigue disponible.`
+            : `Te vas a inscribir en "${mission.title}" para participar por ${mission.points_reward} pts.`
+        }
+        onCancel={() => setIsConfirmingAction(false)}
+        onConfirm={() => {
+          setIsConfirmingAction(false);
+          void handleRegistrationToggle();
+        }}
+        title={isRegistered ? "Salir de la mision" : "Confirmar inscripcion"}
+        visible={isConfirmingAction}
+      />
     </View>
   );
 }
