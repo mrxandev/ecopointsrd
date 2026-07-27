@@ -146,7 +146,12 @@ export function RewardsScreen() {
             paddingHorizontal: 10,
           }}
         >
-          <Text style={{ color: "#0f5238", fontSize: 11, fontWeight: "900" }}>
+          <Text
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
+            style={{ color: "#0f5238", fontSize: 11, fontWeight: "900" }}
+          >
             {new Intl.NumberFormat("es-DO").format(points)} pts
           </Text>
         </View>

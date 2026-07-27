@@ -249,13 +249,23 @@ function LevelCard({
         </Text>
       </View>
 
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end" }}>
-        <Text style={{ color: "#ffffff", fontSize: 22, fontWeight: "900" }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 6 }}>
+        <Text
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.8}
+          style={{ color: "#ffffff", fontSize: 22, fontWeight: "900", flexShrink: 1, minWidth: 100 }}
+        >
           {levelInfo.current.name}
         </Text>
-        <Text style={{ color: "#ffffff", fontSize: 20, fontWeight: "900" }}>
+        <Text
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.7}
+          style={{ color: "#ffffff", fontSize: 18, fontWeight: "900", flexShrink: 1 }}
+        >
           {new Intl.NumberFormat("es-DO").format(points)}
-          <Text style={{ fontSize: 12, fontWeight: "700" }}> pts totales</Text>
+          <Text style={{ fontSize: 11, fontWeight: "700" }}> pts totales</Text>
         </Text>
       </View>
 
@@ -358,23 +368,30 @@ function ImpactStats({ profile }: { profile: UserProfile | null }) {
   ];
 
   return (
-    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
       {stats.map((stat) => (
         <View
           key={stat.label}
           style={{
-            flexBasis: "31%",
-            flexGrow: 1,
-            gap: 6,
+            flex: 1,
+            minWidth: 90,
+            gap: 4,
             borderRadius: 10,
             borderWidth: 1,
             borderColor: isDark ? "#314139" : "#dbe4df",
             backgroundColor: isDark ? "#17231f" : "#ffffff",
-            padding: 12,
+            paddingHorizontal: 8,
+            paddingVertical: 12,
           }}
         >
           <Text style={{ fontSize: 16 }}>{stat.emoji}</Text>
-          <Text style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 16, fontWeight: "900" }}>
+          <Text
+            selectable
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.55}
+            style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 15, fontWeight: "900" }}
+          >
             {new Intl.NumberFormat("es-DO").format(stat.value)}
           </Text>
           <Text style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 11 }} numberOfLines={2}>

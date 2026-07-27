@@ -404,14 +404,22 @@ function StatCard({ accent, label, value }: { accent?: "blue"; label: string; va
         borderWidth: 1,
         borderColor: isDark ? "#314139" : "#e1e8fd",
         backgroundColor: isDark ? "#ffffff" : palette.surface,
+        paddingHorizontal: 6,
+        paddingVertical: 8,
         gap: 4,
         boxShadow: "0 2px 8px rgba(20, 27, 43, 0.06)",
       }}
     >
-      <Text selectable style={{ color: isDark ? "#f3fbf6" : valueColor, fontSize: 16, fontWeight: "900" }}>
+      <Text
+        selectable
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.55}
+        style={{ color: isDark ? "#f3fbf6" : valueColor, fontSize: 16, fontWeight: "900" }}
+      >
         {value}
       </Text>
-      <Text selectable style={{ color: isDark ? "#b8c7bf" : palette.textMuted, fontSize: 11 }}>
+      <Text selectable style={{ color: isDark ? "#b8c7bf" : palette.textMuted, fontSize: 11, textAlign: "center" }} numberOfLines={1}>
         {label}
       </Text>
     </View>
