@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -360,7 +361,7 @@ export function ProfileScreen() {
                   >
                     <Badge
                       active={status.isUnlocked}
-                      icon={status.isUnlocked ? badge.icon : "🔒"}
+                      iconName={status.isUnlocked ? badge.iconName : "lock-closed-outline"}
                       label={badge.title}
                       tone={badge.tone === "blue" ? "blue" : badge.tone === "green" ? "green" : "gray"}
                     />
@@ -474,12 +475,12 @@ function ImpactRow({ label, value }: { label: string; value: string }) {
 
 function Badge({
   active,
-  icon,
+  iconName,
   label,
   tone,
 }: {
   active: boolean;
-  icon: string;
+  iconName: keyof typeof Ionicons.glyphMap;
   label: string;
   tone: "blue" | "gray" | "green";
 }) {
@@ -502,9 +503,7 @@ function Badge({
           backgroundColor: active ? activeBackground : isDark ? "#ffffff" : palette.surfaceLow,
         }}
       >
-        <Text style={{ color: active ? activeColor : "#7b8982", fontSize: 18, fontWeight: "900" }}>
-          {icon}
-        </Text>
+        <Ionicons name={iconName} size={22} color={active ? activeColor : "#7b8982"} />
       </View>
       <Text
         selectable

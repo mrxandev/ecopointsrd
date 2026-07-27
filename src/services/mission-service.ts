@@ -87,13 +87,14 @@ function getApiMessage(data: unknown, fallback: string) {
   return fallback;
 }
 
-export async function getPublishedMissions() {
+export async function getPublishedMissions(token?: string | null) {
   let response: Response;
 
   try {
-    response = await fetch(buildApiUrl("/api/missions?status=PUBLISHED"), {
+    response = await fetch(buildApiUrl("/api/missions?status=PUBLISHED&exclude_completed=true"), {
       headers: {
         Accept: "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     });
   } catch {
@@ -111,11 +112,9 @@ export async function getPublishedMissions() {
     throw new Error(message);
   }
 
-  if (Array.isArray(data)) {
-    return data;
-  }
+  const rawList = Array.isArray(data) ? data : data?.data?.missions ?? [];
 
-  return data?.data?.missions ?? [];
+  return rawList.filter((m) => m.my_registration_status !== "COMPLETED");
 }
 
 export async function getMissionById(id: string, token?: string | null) {
@@ -239,6 +238,57 @@ async function mutateMissionRegistration(
 
   if (!response.ok) {
     const error = new Error(getApiMessage(data, fallbackMessage));
+    error.name = String(response.status);
+    throw error;
+  }
+
+  return data;
+}
+
+export type MissionValidationPayload = {
+  user_id: string;
+  qr_token?: string;
+  notes?: string;
+};
+
+export async function validateMissionParticipation(
+  missionId: string,
+  payload: MissionValidationPayload,
+  token: string,
+) {
+  let response: Response;
+
+  try {
+    response = await fetch(buildApiUrl(`/api/missions/${missionId}/validate`), {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    throw new Error("No pudimos conectar con el servidor. Revisa tu conexión.");
+  }
+
+  const data = (await response.json().catch(() => null)) as {
+    success?: boolean;
+    message?: string;
+    data?: {
+      validation?: {
+        id: string;
+        mission_id: string;
+        user_id: string;
+        points_awarded: number;
+        status: string;
+      };
+    };
+  } | null;
+
+  if (!response.ok) {
+    const message = getApiMessage(data, "No pudimos validar la participación del usuario.");
+    const error = new Error(message);
     error.name = String(response.status);
     throw error;
   }

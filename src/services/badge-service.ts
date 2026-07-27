@@ -1,3 +1,4 @@
+import type { Ionicons } from "@expo/vector-icons";
 import type { UserProfile } from "@/services/user-service";
 
 export type BadgeTone = "green" | "blue" | "gold" | "purple" | "gray";
@@ -7,7 +8,7 @@ export type BadgeDefinition = {
   title: string;
   description: string;
   requirementText: string;
-  icon: string; // Emoji or short symbol
+  iconName: keyof typeof Ionicons.glyphMap;
   tone: BadgeTone;
   category: "Inicio" | "Misiones" | "Puntos";
   targetCount: number;
@@ -20,7 +21,7 @@ export const BADGES_CATALOG: BadgeDefinition[] = [
     title: "Primeros Pasos",
     description: "Te has registrado exitosamente y has iniciado sesión en EcoPoints RD.",
     requirementText: "Crear tu cuenta en EcoPoints RD e iniciar sesión.",
-    icon: "🌱",
+    iconName: "flag-outline",
     tone: "gray",
     category: "Inicio",
     targetCount: 1,
@@ -31,7 +32,7 @@ export const BADGES_CATALOG: BadgeDefinition[] = [
     title: "Reforestador",
     description: "Has completado tu primera misión ecológica con impacto positivo.",
     requirementText: "Completar al menos 1 misión ecológica.",
-    icon: "🌳",
+    iconName: "leaf-outline",
     tone: "green",
     category: "Misiones",
     targetCount: 1,
@@ -42,7 +43,7 @@ export const BADGES_CATALOG: BadgeDefinition[] = [
     title: "Reciclador Activo",
     description: "Has acumulado 200 puntos o más haciendo la diferencia.",
     requirementText: "Acumular un total de 200 puntos.",
-    icon: "♻️",
+    iconName: "sync-outline",
     tone: "blue",
     category: "Puntos",
     targetCount: 200,
@@ -53,7 +54,7 @@ export const BADGES_CATALOG: BadgeDefinition[] = [
     title: "Héroe Comunitario",
     description: "Demuestra tu compromiso activo participando en múltiples misiones.",
     requirementText: "Completar al menos 3 misiones ecológicas.",
-    icon: "🛡️",
+    iconName: "shield-checkmark-outline",
     tone: "green",
     category: "Misiones",
     targetCount: 3,
@@ -64,7 +65,7 @@ export const BADGES_CATALOG: BadgeDefinition[] = [
     title: "Coleccionista Eco",
     description: "Has demostrado un hábito ecológico constante acumulando 1,000 puntos.",
     requirementText: "Acumular un total de 1,000 puntos.",
-    icon: "⭐",
+    iconName: "star-outline",
     tone: "gold",
     category: "Puntos",
     targetCount: 1000,
@@ -75,7 +76,7 @@ export const BADGES_CATALOG: BadgeDefinition[] = [
     title: "Leyenda Verde",
     description: "Un verdadero referente en la protección de nuestro entorno.",
     requirementText: "Completar 5 misiones ecológicas.",
-    icon: "👑",
+    iconName: "trophy-outline",
     tone: "purple",
     category: "Misiones",
     targetCount: 5,

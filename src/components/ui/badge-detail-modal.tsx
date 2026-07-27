@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Modal, Pressable, Text, View } from "react-native";
 
 import {
@@ -31,7 +32,7 @@ export function BadgeDetailModal({
   }
 
   const status = getBadgeStatus(badge, profile);
-  const colors = TONE_COLORS[badge.tone];
+  const colors = TONE_COLORS[badge.tone] ?? TONE_COLORS.green;
 
   return (
     <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
@@ -39,7 +40,7 @@ export function BadgeDetailModal({
         onPress={onClose}
         style={{
           flex: 1,
-          backgroundColor: "rgba(15, 23, 20, 0.6)",
+          backgroundColor: "rgba(15, 23, 20, 0.65)",
           alignItems: "center",
           justifyContent: "center",
           padding: 20,
@@ -52,9 +53,10 @@ export function BadgeDetailModal({
             maxWidth: 340,
             borderRadius: 20,
             backgroundColor: "#ffffff",
-            padding: 22,
+            padding: 24,
+            alignItems: "center",
             gap: 16,
-            boxShadow: "0 12px 32px rgba(20, 27, 43, 0.2)",
+            boxShadow: "0 12px 32px rgba(20, 27, 43, 0.22)",
             elevation: 10,
           }}
         >
@@ -73,7 +75,11 @@ export function BadgeDetailModal({
                 opacity: status.isUnlocked ? 1 : 0.6,
               }}
             >
-              <Text style={{ fontSize: 34 }}>{status.isUnlocked ? badge.icon : "🔒"}</Text>
+              <Ionicons
+                name={status.isUnlocked ? badge.iconName : "lock-closed-outline"}
+                size={30}
+                color={status.isUnlocked ? colors.text : "#72837a"}
+              />
             </View>
 
             <Text selectable style={{ color: "#141b2b", fontSize: 20, fontWeight: "900", textAlign: "center" }}>
@@ -97,7 +103,7 @@ export function BadgeDetailModal({
                   fontWeight: "800",
                 }}
               >
-                {status.isUnlocked ? "✓ Insignia Desbloqueada" : "🔒 Insignia Bloqueada"}
+                {status.isUnlocked ? "Insignia Desbloqueada" : "Insignia Bloqueada"}
               </Text>
             </View>
           </View>
@@ -118,12 +124,9 @@ export function BadgeDetailModal({
               gap: 8,
             }}
           >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-              <Text style={{ fontSize: 14 }}>🎯</Text>
-              <Text style={{ color: "#1b5c3f", fontSize: 12, fontWeight: "900" }}>
-                ¿CÓMO SE OBTIENE?
-              </Text>
-            </View>
+            <Text style={{ color: "#1b5c3f", fontSize: 12, fontWeight: "900", letterSpacing: 0.4 }}>
+              ¿CÓMO SE OBTIENE?
+            </Text>
             <Text selectable style={{ color: "#23332b", fontSize: 13, fontWeight: "700", lineHeight: 18 }}>
               {badge.requirementText}
             </Text>

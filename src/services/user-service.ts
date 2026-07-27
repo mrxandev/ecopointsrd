@@ -259,3 +259,56 @@ export async function getUserRanking(token?: string | null) {
 
   throw lastError ?? new Error("No pudimos cargar el ranking.");
 }
+
+export async function searchUserByCedula(cedula: string, token: string): Promise<UserProfile> {
+  const rawInput = cedula.trim();
+  const cleanCedula = rawInput.replace(/\D/g, "");
+  if (!cleanCedula) {
+    throw new Error("Ingresa un número de cédula válido.");
+  }
+
+  const searchTerms = Array.from(new Set([cleanCedula, rawInput])).filter(Boolean);
+  let usersList: UserProfile[] = [];
+  let lastError: Error | null = null;
+
+  for (const term of searchTerms) {
+    try {
+      const response = await fetch(buildApiUrl(`/api/admin/users?search=${encodeURIComponent(term)}`), {
+        headers: jsonHeaders(token),
+      });
+
+      const data = (await response.json().catch(() => null)) as {
+        success?: boolean;
+        message?: string;
+        data?: {
+          users?: UserProfile[];
+        };
+      } | null;
+
+      if (response.ok && data?.data?.users?.length) {
+        usersList = data.data.users;
+        break;
+      } else if (!response.ok) {
+        lastError = createApiError(data, "No pudimos realizar la búsqueda por cédula.", response.status);
+      }
+    } catch {
+      lastError = new Error("No pudimos conectar con el servidor. Revisa tu conexión.");
+    }
+  }
+
+  const matchedUser = usersList.find(
+    (u) =>
+      u.cedula?.replace(/\D/g, "") === cleanCedula ||
+      u.cedula === rawInput ||
+      u.cedula?.includes(cleanCedula)
+  ) ?? usersList[0];
+
+  if (!matchedUser) {
+    if (lastError) {
+      throw lastError;
+    }
+    throw new Error(`No encontramos ningún usuario registrado con la cédula "${cedula}".`);
+  }
+
+  return matchedUser;
+}

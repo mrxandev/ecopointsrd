@@ -10,6 +10,7 @@ import {
 import { Image } from "expo-image";
 
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { UserQrModal } from "@/components/ui/user-qr-modal";
 import { useAuth } from "@/hooks/use-auth";
 import {
   formatMissionDate,
@@ -34,6 +35,7 @@ export function MissionDetailScreen() {
   const [isConfirmingAction, setIsConfirmingAction] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
   const loadMission = useCallback(async () => {
     if (!id) {
@@ -340,24 +342,46 @@ export function MissionDetailScreen() {
           backgroundColor: isDark ? "#f9f9ff" : "#f9f9ff",
           borderTopWidth: 1,
           borderTopColor: isDark ? "#26332f" : "#d1d5db",
+          gap: 10,
         }}
       >
+        {isRegistered ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setIsQrModalOpen(true)}
+            style={{
+              minHeight: 48,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 8,
+              backgroundColor: "#28734f",
+            }}
+          >
+            <Text style={{ color: "#ffffff", fontSize: 14, fontWeight: "900" }}>
+              Ver mi Código QR de Asistencia
+            </Text>
+          </Pressable>
+        ) : null}
+
         <Pressable
           accessibilityRole="button"
           disabled={isSubmitting}
           onPress={() => setIsConfirmingAction(true)}
           style={{
-            minHeight: 52,
+            minHeight: isRegistered ? 42 : 52,
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 8,
-            backgroundColor: isSubmitting ? "#90a79b" : isRegistered ? "#93000a" : "#0f5238",
+            backgroundColor: isSubmitting ? "#90a79b" : isRegistered ? "#ffffff" : "#0f5238",
+            borderWidth: isRegistered ? 1 : 0,
+            borderColor: isRegistered ? "#f2b8b5" : "transparent",
           }}
         >
           {isSubmitting ? (
-            <ActivityIndicator color="#ffffff" />
+            <ActivityIndicator color={isRegistered ? "#93000a" : "#ffffff"} />
           ) : (
-            <Text style={{ color: "#ffffff", fontSize: 15, fontWeight: "900" }}>
+            <Text style={{ color: isRegistered ? "#93000a" : "#ffffff", fontSize: 14, fontWeight: "800" }}>
               {isRegistered
                 ? "Salirme de la mision"
                 : `Inscribirme - ${mission.points_reward} pts`}
@@ -381,6 +405,14 @@ export function MissionDetailScreen() {
         title={isRegistered ? "Salir de la mision" : "Confirmar inscripcion"}
         visible={isConfirmingAction}
       />
+      {mission ? (
+        <UserQrModal
+          missionId={mission.id}
+          missionTitle={mission.title}
+          onClose={() => setIsQrModalOpen(false)}
+          visible={isQrModalOpen}
+        />
+      ) : null}
     </View>
   );
 }

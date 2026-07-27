@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -52,7 +53,7 @@ export function HomeScreen() {
         setError(null);
         const [nextProfile, nextMissions] = await Promise.all([
           token ? getMyProfile(token) : Promise.resolve(null),
-          getPublishedMissions(),
+          getPublishedMissions(token),
         ]);
         setProfile(nextProfile);
         setMissions(nextMissions);
@@ -302,9 +303,9 @@ function QuickActions() {
   const isDark = colorScheme === "dark";
 
   const actions = [
-    { label: "Ver mapa", emoji: "🗺️", href: "/(tabs)/mapa" as const, tint: "#1d6fa5" },
-    { label: "Reciclar ahora", emoji: "♻️", href: "/(tabs)/mapa" as const, tint: "#28734f" },
-    { label: "Canjear Recompensas", emoji: "🎁", href: "/(tabs)/recompensas" as const, tint: "#c07a1f" },
+    { label: "Ver mapa", icon: "map-outline" as const, href: "/(tabs)/mapa" as const, tint: "#1d6fa5" },
+    { label: "Reciclar ahora", icon: "leaf-outline" as const, href: "/(tabs)/mapa" as const, tint: "#28734f" },
+    { label: "Canjear Recompensas", icon: "gift-outline" as const, href: "/(tabs)/recompensas" as const, tint: "#c07a1f" },
   ];
 
   return (
@@ -337,7 +338,7 @@ function QuickActions() {
                 backgroundColor: `${action.tint}1f`,
               }}
             >
-              <Text style={{ fontSize: 18 }}>{action.emoji}</Text>
+              <Ionicons name={action.icon} size={20} color={action.tint} />
             </View>
             <Text
               numberOfLines={2}
@@ -362,9 +363,9 @@ function ImpactStats({ profile }: { profile: UserProfile | null }) {
   const isDark = colorScheme === "dark";
 
   const stats = [
-    { label: "Misiones completadas", value: profile?.completed_missions ?? 0, emoji: "🌱" },
-    { label: "Puntos acumulados", value: profile?.total_points_earned ?? 0, emoji: "📈" },
-    { label: "Puntos disponibles", value: profile?.points ?? 0, emoji: "⭐" },
+    { label: "Misiones completadas", value: profile?.completed_missions ?? 0, icon: "checkmark-done-circle-outline" as const, color: "#28734f" },
+    { label: "Puntos acumulados", value: profile?.total_points_earned ?? 0, icon: "trending-up-outline" as const, color: "#1d6fa5" },
+    { label: "Puntos disponibles", value: profile?.points ?? 0, icon: "star-outline" as const, color: "#c07a1f" },
   ];
 
   return (
@@ -384,7 +385,7 @@ function ImpactStats({ profile }: { profile: UserProfile | null }) {
             paddingVertical: 12,
           }}
         >
-          <Text style={{ fontSize: 16 }}>{stat.emoji}</Text>
+          <Ionicons name={stat.icon} size={20} color={stat.color} />
           <Text
             selectable
             numberOfLines={1}
