@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import type { ComponentProps } from "react";
-import { type ColorValue, View } from "react-native";
+import { type ColorValue, Pressable, View } from "react-native";
 
 import { AppTopBarTitle } from "@/components/navigation/app-top-bar-title";
 
@@ -38,21 +38,32 @@ export default function TabsLayout() {
         headerLeft: () => null,
         tabBarActiveTintColor: ACTIVE_COLOR,
         tabBarInactiveTintColor: isDark ? "#d7dde0" : INACTIVE_COLOR,
+        tabBarButton: ({ ref, ...props }) => (
+          <Pressable
+            {...props}
+            android_ripple={{ color: "rgba(45, 106, 79, 0.12)", borderless: false, radius: 24 }}
+            style={({ pressed }) => [
+              props.style,
+              { opacity: pressed ? 0.75 : 1 },
+            ]}
+          />
+        ),
         tabBarLabelStyle: {
-          fontSize: 12,
-          lineHeight: 16,
-          fontWeight: "500",
+          fontSize: 11,
+          lineHeight: 14,
+          fontWeight: "600",
         },
         tabBarStyle: {
-          height: 64,
-          paddingTop: 7,
+          height: 60,
+          paddingTop: 6,
           paddingBottom: 6,
           backgroundColor: isDark ? "#ffffff" : "#ffffff",
           borderTopColor: isDark ? "#26332f" : BAR_BORDER,
           borderTopWidth: 1,
         },
         tabBarItemStyle: {
-          gap: 2,
+          gap: 1,
+          paddingHorizontal: 2,
         },
       }}
     >
@@ -84,8 +95,8 @@ function TabIcon({
   return (
     <View
       style={{
-        width: 64,
-        height: 32,
+        width: 48,
+        height: 28,
         alignItems: "center",
         justifyContent: "center",
         borderRadius: 999,
