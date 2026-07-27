@@ -15,7 +15,6 @@ import {
   formatMissionDate,
   getMissionImage,
   getMissionLocation,
-  getMissionRequirements,
 } from "@/screens/missions/mission-ui";
 import {
   getMissionById,
@@ -295,23 +294,6 @@ export function MissionDetailScreen() {
             </Text>
           </View>
 
-          <View style={{ gap: 8 }}>
-            <Text
-              selectable
-              style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 18, fontWeight: "900" }}
-            >
-              Que debes llevar?
-            </Text>
-            {getMissionRequirements(mission).map((requirement) => (
-              <Text
-                selectable
-                key={requirement}
-                style={{ color: isDark ? "#c9d6cf" : "#374c42", fontSize: 14 }}
-              >
-                - {requirement}
-              </Text>
-            ))}
-          </View>
 
           {actionMessage ? (
             <View
