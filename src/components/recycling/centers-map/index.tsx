@@ -1,4 +1,4 @@
-import { createElement, useMemo } from "react";
+import { createElement, forwardRef, useImperativeHandle, useMemo, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 
 export type MapActivity = {
@@ -11,13 +11,29 @@ export type MapActivity = {
   subtitle: string;
 };
 
-export function CentersMap({
-  activities,
-  focusedActivityId,
-}: {
-  activities: MapActivity[];
-  focusedActivityId?: string | null;
-}) {
+export type CentersMapRef = {
+  zoomIn: () => void;
+  zoomOut: () => void;
+};
+
+export const CentersMap = forwardRef<
+  CentersMapRef,
+  {
+    activities: MapActivity[];
+    focusedActivityId?: string | null;
+  }
+>(function CentersMap({ activities, focusedActivityId }, ref) {
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    zoomIn: () => {
+      iframeRef.current?.contentWindow?.postMessage("ZOOM_IN", "*");
+    },
+    zoomOut: () => {
+      iframeRef.current?.contentWindow?.postMessage("ZOOM_OUT", "*");
+    },
+  }));
+
   const html = useMemo(
     () => getMapHtml(activities, focusedActivityId),
     [activities, focusedActivityId],
@@ -26,13 +42,14 @@ export function CentersMap({
   return (
     <View style={styles.container}>
       {createElement("iframe", {
+        ref: iframeRef,
         srcDoc: html,
         style: iframeStyle,
         title: "Mapa de misiones y centros de reciclaje",
       })}
     </View>
   );
-}
+});
 
 function getMapHtml(activities: MapActivity[], focusedActivityId?: string | null) {
   const safeActivities = JSON.stringify(activities).replace(/</g, "\\u003c");
@@ -75,6 +92,13 @@ function getMapHtml(activities: MapActivity[], focusedActivityId?: string | null
       const activities = ${safeActivities};
       const focusedActivityId = ${safeFocusedActivityId};
       const map = L.map("map", { attributionControl: true, dragging: true, tap: true, touchZoom: true, zoomControl: false }).setView([18.7357, -70.1627], 8);
+      window.mapInstance = map;
+
+      window.addEventListener("message", function(event) {
+        if (!window.mapInstance) return;
+        if (event.data === "ZOOM_IN") window.mapInstance.zoomIn();
+        if (event.data === "ZOOM_OUT") window.mapInstance.zoomOut();
+      });
 
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "&copy; OpenStreetMap contributors",

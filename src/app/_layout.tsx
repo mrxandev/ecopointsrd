@@ -43,6 +43,8 @@ function RootNavigator() {
     const isRecyclingCenterRoute = routeGroup === "recycling-center";
     const isChangePasswordRoute = routeGroup === "change-password";
     const isPointHistoryRoute = routeGroup === "point-history";
+    const isRankingRoute = routeGroup === "ranking";
+    const isBadgesRoute = routeGroup === "badges";
 
     if (!isAuthenticated) {
       if (!isAuthRoute) {
@@ -58,7 +60,9 @@ function RootNavigator() {
       !isMissionRoute &&
       !isRecyclingCenterRoute &&
       !isChangePasswordRoute &&
-      !isPointHistoryRoute
+      !isPointHistoryRoute &&
+      !isRankingRoute &&
+      !isBadgesRoute
     ) {
       router.replace("/");
       return;
@@ -96,6 +100,26 @@ function RootNavigator() {
       />
       <Stack.Screen
         name="point-history"
+        options={{
+          headerShown: true,
+          headerTitle: () => <AppTopBarTitle />,
+          headerTitleAlign: "center",
+          headerLeft: () => <MissionBackButton />,
+          headerShadowVisible: true,
+        }}
+      />
+      <Stack.Screen
+        name="ranking"
+        options={{
+          headerShown: true,
+          headerTitle: () => <AppTopBarTitle />,
+          headerTitleAlign: "center",
+          headerLeft: () => <MissionBackButton />,
+          headerShadowVisible: true,
+        }}
+      />
+      <Stack.Screen
+        name="badges"
         options={{
           headerShown: true,
           headerTitle: () => <AppTopBarTitle />,

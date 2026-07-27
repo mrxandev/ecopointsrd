@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -23,6 +23,7 @@ import {
 import { getRecyclingCenters, type RecyclingCenter } from "@/services/recycling-service";
 import {
   CentersMap,
+  type CentersMapRef,
   type MapActivity as MapMarkerActivity,
 } from "../../components/recycling/centers-map";
 import { getCenterLocation } from "./recycling-utils";
@@ -77,6 +78,9 @@ export function RecyclingMapScreen() {
   const [error, setError] = useState<string | null>(null);
   const [focusedActivityId, setFocusedActivityId] = useState<string | null>(null);
   const [isMapTouching, setIsMapTouching] = useState(false);
+  const [isSheetCollapsed, setIsSheetCollapsed] = useState(false);
+
+  const mapRef = useRef<CentersMapRef>(null);
 
   const loadActivities = useCallback(async (mode: "initial" | "refresh" = "initial") => {
     if (mode === "refresh") {
@@ -169,7 +173,9 @@ export function RecyclingMapScreen() {
         onTouchStart={() => setIsMapTouching(true)}
         style={{ flex: 1, minHeight: 330 }}
       >
-        <CentersMap activities={mapActivities} focusedActivityId={focusedActivityId} />
+        <CentersMap ref={mapRef} activities={mapActivities} focusedActivityId={focusedActivityId} />
+        
+        {/* Header Search & Filter Bar */}
         <View style={{ position: "absolute", left: 14, right: 14, top: 14, gap: 8 }}>
           <View
             style={{
@@ -231,113 +237,200 @@ export function RecyclingMapScreen() {
               })}
             </View>
           </ScrollView>
+        </View>
 
+        {/* Floating Zoom Control Buttons */}
+        <View
+          style={{
+            position: "absolute",
+            right: 14,
+            top: 116,
+            borderRadius: 12,
+            backgroundColor: "#ffffff",
+            boxShadow: "0 4px 14px rgba(20, 27, 43, 0.16)",
+            overflow: "hidden",
+            elevation: 4,
+          }}
+        >
+          <Pressable
+            accessibilityLabel="Acercar mapa"
+            accessibilityRole="button"
+            onPress={() => mapRef.current?.zoomIn()}
+            style={({ pressed }) => ({
+              width: 44,
+              height: 44,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: pressed ? "#eef3f0" : "#ffffff",
+              borderBottomWidth: 1,
+              borderBottomColor: "#eef2ef",
+            })}
+          >
+            <Text style={{ color: "#141b2b", fontSize: 22, fontWeight: "900" }}>+</Text>
+          </Pressable>
+          <Pressable
+            accessibilityLabel="Alejar mapa"
+            accessibilityRole="button"
+            onPress={() => mapRef.current?.zoomOut()}
+            style={({ pressed }) => ({
+              width: 44,
+              height: 44,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: pressed ? "#eef3f0" : "#ffffff",
+            })}
+          >
+            <Text style={{ color: "#141b2b", fontSize: 22, fontWeight: "900" }}>−</Text>
+          </Pressable>
         </View>
       </View>
 
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={() => void loadActivities("refresh")}
-          />
-        }
-        scrollEnabled={!isMapTouching}
-        style={{
-          position: "absolute",
-          left: 10,
-          right: 10,
-          bottom: 0,
-          maxHeight: "54%",
-          borderTopLeftRadius: 18,
-          borderTopRightRadius: 18,
-          borderBottomLeftRadius: 8,
-          borderBottomRightRadius: 8,
-          backgroundColor: "#ffffff",
-          boxShadow: "0 -8px 22px rgba(20, 27, 43, 0.16)",
-        }}
-        contentContainerStyle={{ padding: 14, paddingBottom: 92, gap: 10 }}
-      >
-        <View
-          style={{
-            alignSelf: "center",
-            width: 74,
-            height: 4,
+      {/* Collapsible Bottom Sheet */}
+      {isSheetCollapsed ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => setIsSheetCollapsed(false)}
+          style={({ pressed }) => ({
+            position: "absolute",
+            left: 14,
+            right: 14,
+            bottom: 24,
+            minHeight: 48,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
             borderRadius: 999,
-            backgroundColor: "#c6d0c8",
-            marginBottom: 4,
-          }}
-        />
-
-        <Text selectable style={{ color: "#141b2b", fontSize: 18, fontWeight: "900" }}>
-          {filteredActivities.length} actividades cerca de ti
-        </Text>
-
-        {isLoading ? (
-          <View style={{ minHeight: 180, alignItems: "center", justifyContent: "center", gap: 12 }}>
-            <ActivityIndicator color="#2d6a4f" />
-            <Text selectable style={{ color: "#404943" }}>
-              Cargando actividades...
+            backgroundColor: pressed ? "#23553f" : "#2d6a4f",
+            paddingHorizontal: 18,
+            boxShadow: "0 6px 18px rgba(20, 27, 43, 0.22)",
+            elevation: 6,
+          })}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Text style={{ fontSize: 16 }}>📋</Text>
+            <Text style={{ color: "#ffffff", fontSize: 13, fontWeight: "900" }}>
+              Ver {filteredActivities.length} actividades en lista
             </Text>
           </View>
-        ) : null}
-
-        {!isLoading && error ? (
           <View
             style={{
-              borderRadius: 8,
-              backgroundColor: "#ffdad6",
-              padding: 14,
-              gap: 12,
+              borderRadius: 999,
+              backgroundColor: "rgba(255, 255, 255, 0.22)",
+              paddingHorizontal: 12,
+              paddingVertical: 5,
             }}
           >
-            <Text selectable style={{ color: "#93000a", fontWeight: "800" }}>
-              {error}
+            <Text style={{ color: "#ffffff", fontSize: 12, fontWeight: "900" }}>▲ Desplegar</Text>
+          </View>
+        </Pressable>
+      ) : (
+        <ScrollView
+          contentInsetAdjustmentBehavior="automatic"
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={() => void loadActivities("refresh")}
+            />
+          }
+          scrollEnabled={!isMapTouching}
+          style={{
+            position: "absolute",
+            left: 10,
+            right: 10,
+            bottom: 0,
+            maxHeight: "54%",
+            borderTopLeftRadius: 18,
+            borderTopRightRadius: 18,
+            borderBottomLeftRadius: 8,
+            borderBottomRightRadius: 8,
+            backgroundColor: "#ffffff",
+            boxShadow: "0 -8px 22px rgba(20, 27, 43, 0.16)",
+          }}
+          contentContainerStyle={{ padding: 14, paddingBottom: 92, gap: 10 }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+            <Text selectable style={{ color: "#141b2b", fontSize: 17, fontWeight: "900" }}>
+              {filteredActivities.length} actividades cerca de ti
             </Text>
             <Pressable
               accessibilityRole="button"
-              onPress={() => void loadActivities()}
+              onPress={() => setIsSheetCollapsed(true)}
+              style={({ pressed }) => ({
+                borderRadius: 999,
+                backgroundColor: pressed ? "#dde5e0" : "#eef3f0",
+                paddingHorizontal: 12,
+                paddingVertical: 5,
+              })}
+            >
+              <Text style={{ color: "#2d6a4f", fontSize: 12, fontWeight: "900" }}>▼ Ocultar</Text>
+            </Pressable>
+          </View>
+
+          {isLoading ? (
+            <View style={{ minHeight: 180, alignItems: "center", justifyContent: "center", gap: 12 }}>
+              <ActivityIndicator color="#2d6a4f" />
+              <Text selectable style={{ color: "#404943" }}>
+                Cargando actividades...
+              </Text>
+            </View>
+          ) : null}
+
+          {!isLoading && error ? (
+            <View
               style={{
-                minHeight: 42,
+                borderRadius: 8,
+                backgroundColor: "#ffdad6",
+                padding: 14,
+                gap: 12,
+              }}
+            >
+              <Text selectable style={{ color: "#93000a", fontWeight: "800" }}>
+                {error}
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => void loadActivities()}
+                style={{
+                  minHeight: 42,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 8,
+                  backgroundColor: "#2d6a4f",
+                }}
+              >
+                <Text style={{ color: "#ffffff", fontWeight: "900" }}>Reintentar</Text>
+              </Pressable>
+            </View>
+          ) : null}
+
+          {!isLoading && !error
+            ? filteredActivities.map((activity) => (
+                <ActivityCard
+                  activity={activity}
+                  key={activity.id}
+                  onFocusMap={setFocusedActivityId}
+                />
+              ))
+            : null}
+
+          {!isLoading && !error && filteredActivities.length === 0 ? (
+            <View
+              style={{
+                minHeight: 150,
                 alignItems: "center",
                 justifyContent: "center",
                 borderRadius: 8,
-                backgroundColor: "#2d6a4f",
+                backgroundColor: "#f5f8f6",
+                padding: 20,
               }}
             >
-              <Text style={{ color: "#ffffff", fontWeight: "900" }}>Reintentar</Text>
-            </Pressable>
-          </View>
-        ) : null}
-
-        {!isLoading && !error
-          ? filteredActivities.map((activity) => (
-              <ActivityCard
-                activity={activity}
-                key={activity.id}
-                onFocusMap={setFocusedActivityId}
-              />
-            ))
-          : null}
-
-        {!isLoading && !error && filteredActivities.length === 0 ? (
-          <View
-            style={{
-              minHeight: 150,
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: 8,
-              backgroundColor: "#f5f8f6",
-              padding: 20,
-            }}
-          >
-            <Text selectable style={{ color: "#141b2b", fontWeight: "900", textAlign: "center" }}>
-              No encontramos actividades con ese filtro.
-            </Text>
-          </View>
-        ) : null}
-      </ScrollView>
+              <Text selectable style={{ color: "#141b2b", fontWeight: "900", textAlign: "center" }}>
+                No encontramos actividades con ese filtro.
+              </Text>
+            </View>
+          ) : null}
+        </ScrollView>
+      )}
     </View>
   );
 }

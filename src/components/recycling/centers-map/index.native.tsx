@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { WebView } from "react-native-webview";
 
@@ -12,15 +12,34 @@ export type MapActivity = {
   subtitle: string;
 };
 
-export function CentersMap({
-  activities,
-  focusedActivityId,
-}: {
-  activities: MapActivity[];
-  focusedActivityId?: string | null;
-}) {
+export type CentersMapRef = {
+  zoomIn: () => void;
+  zoomOut: () => void;
+};
+
+export const CentersMap = forwardRef<
+  CentersMapRef,
+  {
+    activities: MapActivity[];
+    focusedActivityId?: string | null;
+  }
+>(function CentersMap({ activities, focusedActivityId }, ref) {
   const webViewRef = useRef<WebView>(null);
   const [errorHtml, setErrorHtml] = useState<string | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    zoomIn: () => {
+      webViewRef.current?.injectJavaScript(
+        "if (window.mapInstance) { window.mapInstance.zoomIn(); } true;",
+      );
+    },
+    zoomOut: () => {
+      webViewRef.current?.injectJavaScript(
+        "if (window.mapInstance) { window.mapInstance.zoomOut(); } true;",
+      );
+    },
+  }));
+
   const html = useMemo(
     () => getMapHtml(activities, focusedActivityId),
     [activities, focusedActivityId],
@@ -54,7 +73,7 @@ export function CentersMap({
       ) : null}
     </View>
   );
-}
+});
 
 function getMapHtml(activities: MapActivity[], focusedActivityId?: string | null) {
   const safeActivities = JSON.stringify(activities).replace(/</g, "\\u003c");

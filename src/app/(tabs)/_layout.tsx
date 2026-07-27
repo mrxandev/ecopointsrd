@@ -18,7 +18,6 @@ const TAB_ITEMS: {
   { name: "index", title: "Inicio", icon: "home" },
   { name: "mapa", title: "Mapa", icon: "map" },
   { name: "misiones", title: "Misiones", icon: "missions" },
-  { name: "ranking", title: "Ranking", icon: "ranking" },
   { name: "recompensas", title: "Recompensas", icon: "rewards" },
   { name: "perfil", title: "Perfil", icon: "profile" },
 ];

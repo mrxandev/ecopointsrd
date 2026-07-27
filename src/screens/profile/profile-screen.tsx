@@ -11,7 +11,13 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 
+import { BadgeDetailModal } from "@/components/ui/badge-detail-modal";
 import { useAuth } from "@/hooks/use-auth";
+import {
+  BADGES_CATALOG,
+  type BadgeDefinition,
+  getBadgeStatus,
+} from "@/services/badge-service";
 import {
   getMyPoints,
   getMyProfile,
@@ -75,6 +81,7 @@ export function ProfileScreen() {
     address: "",
     profile_image: "",
   });
+  const [selectedBadge, setSelectedBadge] = useState<BadgeDefinition | null>(null);
 
   const loadProfile = useCallback(
     async (mode: "initial" | "refresh" = "initial") => {
@@ -333,14 +340,33 @@ export function ProfileScreen() {
               >
                 Insignias recientes
               </Text>
-              <Text selectable style={{ color: palette.primary, fontSize: 11, fontWeight: "900" }}>
-                Ver todas
-              </Text>
+              <Link href="/badges" asChild>
+                <Pressable accessibilityRole="button">
+                  <Text style={{ color: palette.primary, fontSize: 11, fontWeight: "900" }}>
+                    Ver todas
+                  </Text>
+                </Pressable>
+              </Link>
             </View>
             <View style={{ flexDirection: "row", gap: 10 }}>
-              <Badge label="Reforestador" icon="A" active={activeProfile.completed_missions >= 1} tone="green" />
-              <Badge label="Reciclador" icon="R" active={activeProfile.total_points_earned >= 200} tone="blue" />
-              <Badge label="Primeros pasos" icon="P" active={activeProfile.points >= 0} tone="gray" />
+              {BADGES_CATALOG.slice(0, 3).map((badge) => {
+                const status = getBadgeStatus(badge, activeProfile);
+                return (
+                  <Pressable
+                    accessibilityRole="button"
+                    key={badge.id}
+                    onPress={() => setSelectedBadge(badge)}
+                    style={{ flex: 1 }}
+                  >
+                    <Badge
+                      active={status.isUnlocked}
+                      icon={status.isUnlocked ? badge.icon : "🔒"}
+                      label={badge.title}
+                      tone={badge.tone === "blue" ? "blue" : badge.tone === "green" ? "green" : "gray"}
+                    />
+                  </Pressable>
+                );
+              })}
             </View>
           </View>
 
@@ -379,6 +405,13 @@ export function ProfileScreen() {
             <MenuRow label="Privacidad" icon="privacy" />
             <MenuRow label="Cerrar sesion" icon="logout" danger onPress={logout} />
           </View>
+
+          <BadgeDetailModal
+            badge={selectedBadge}
+            onClose={() => setSelectedBadge(null)}
+            profile={activeProfile}
+            visible={Boolean(selectedBadge)}
+          />
         </>
       ) : null}
     </ScrollView>
