@@ -1,5 +1,5 @@
-import { DefaultTheme, ThemeProvider } from "expo-router/react-navigation";
 import { useRouter, useSegments } from "expo-router";
+import { DefaultTheme, ThemeProvider } from "expo-router/react-navigation";
 import { Stack } from "expo-router/stack";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar as ExpoStatusBar } from "expo-status-bar";
@@ -68,7 +68,11 @@ function RootNavigator() {
       return;
     }
 
-    if ((role === "AGENT" || role === "ADMIN") && !isAgentRoute && !isChangePasswordRoute) {
+    if (
+      (role === "AGENT" || role === "ADMIN") &&
+      !isAgentRoute &&
+      !isChangePasswordRoute
+    ) {
       router.replace("/validar");
     }
   }, [isAuthenticated, isLoading, role, router, segments]);
@@ -151,4 +155,3 @@ function RootNavigator() {
     </Stack>
   );
 }
-

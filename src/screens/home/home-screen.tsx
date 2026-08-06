@@ -8,11 +8,11 @@ import {
   RefreshControl,
   ScrollView,
   Text,
-  useColorScheme,
   View,
 } from "react-native";
 
 import { useAuth } from "@/hooks/use-auth";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
   formatMissionDate,
   getMissionImage,
@@ -59,7 +59,9 @@ export function HomeScreen() {
         setMissions(nextMissions);
       } catch (loadError) {
         setError(
-          loadError instanceof Error ? loadError : new Error("No pudimos cargar tu inicio."),
+          loadError instanceof Error
+            ? loadError
+            : new Error("No pudimos cargar tu inicio."),
         );
       } finally {
         setIsLoading(false);
@@ -84,7 +86,10 @@ export function HomeScreen() {
   const levelInfo = useMemo(() => getLevelProgress(points), [points]);
 
   const recommendedMissions = useMemo(
-    () => [...missions].sort((a, b) => b.points_reward - a.points_reward).slice(0, 4),
+    () =>
+      [...missions]
+        .sort((a, b) => b.points_reward - a.points_reward)
+        .slice(0, 4),
     [missions],
   );
 
@@ -93,7 +98,9 @@ export function HomeScreen() {
       [...missions]
         .filter((mission) => Boolean(mission.start_date))
         .sort(
-          (a, b) => new Date(a.start_date ?? 0).getTime() - new Date(b.start_date ?? 0).getTime(),
+          (a, b) =>
+            new Date(a.start_date ?? 0).getTime() -
+            new Date(b.start_date ?? 0).getTime(),
         )
         .slice(0, 3),
     [missions],
@@ -103,7 +110,10 @@ export function HomeScreen() {
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       refreshControl={
-        <RefreshControl refreshing={isRefreshing} onRefresh={() => void loadHome("refresh")} />
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={() => void loadHome("refresh")}
+        />
       }
       style={{ flex: 1, backgroundColor: isDark ? "#101815" : "#f4f7f3" }}
       contentContainerStyle={{ padding: 16, paddingBottom: 92, gap: 16 }}
@@ -111,19 +121,36 @@ export function HomeScreen() {
       <View style={{ gap: 4 }}>
         <Text
           selectable
-          style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 24, fontWeight: "900" }}
+          style={{
+            color: isDark ? "#f3fbf6" : "#17231f",
+            fontSize: 24,
+            fontWeight: "900",
+          }}
         >
           Buenos dias, {getGreetingName(profile, user?.email)} 👋
         </Text>
-        <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 14 }}>
+        <Text
+          selectable
+          style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 14 }}
+        >
           Lista para hacer la diferencia hoy.
         </Text>
       </View>
 
       {isLoading ? (
-        <View style={{ minHeight: 280, alignItems: "center", justifyContent: "center", gap: 12 }}>
+        <View
+          style={{
+            minHeight: 280,
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 12,
+          }}
+        >
           <ActivityIndicator color="#28734f" />
-          <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 14 }}>
+          <Text
+            selectable
+            style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 14 }}
+          >
             Cargando tu inicio...
           </Text>
         </View>
@@ -140,7 +167,10 @@ export function HomeScreen() {
             gap: 12,
           }}
         >
-          <Text selectable style={{ color: isDark ? "#ffd9d6" : "#8c1d18", fontWeight: "700" }}>
+          <Text
+            selectable
+            style={{ color: isDark ? "#ffd9d6" : "#8c1d18", fontWeight: "700" }}
+          >
             {error.message}
           </Text>
           <Pressable
@@ -170,7 +200,11 @@ export function HomeScreen() {
           <View style={{ gap: 10 }}>
             <Text
               selectable
-              style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 18, fontWeight: "900" }}
+              style={{
+                color: isDark ? "#f3fbf6" : "#17231f",
+                fontSize: 18,
+                fontWeight: "900",
+              }}
             >
               Tu Impacto
             </Text>
@@ -178,22 +212,44 @@ export function HomeScreen() {
           </View>
 
           <View style={{ gap: 10 }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
               <Text
                 selectable
-                style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 18, fontWeight: "900" }}
+                style={{
+                  color: isDark ? "#f3fbf6" : "#17231f",
+                  fontSize: 18,
+                  fontWeight: "900",
+                }}
               >
                 Misiones Recomendadas
               </Text>
               <Link href="/(tabs)/misiones" asChild>
                 <Pressable accessibilityRole="button">
-                  <Text style={{ color: "#28734f", fontSize: 13, fontWeight: "800" }}>Ver todas</Text>
+                  <Text
+                    style={{
+                      color: "#28734f",
+                      fontSize: 13,
+                      fontWeight: "800",
+                    }}
+                  >
+                    Ver todas
+                  </Text>
                 </Pressable>
               </Link>
             </View>
 
             {recommendedMissions.length > 0 ? (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: 12 }}
+              >
                 {recommendedMissions.map((mission) => (
                   <RecommendedMissionCard key={mission.id} mission={mission} />
                 ))}
@@ -206,7 +262,11 @@ export function HomeScreen() {
           <View style={{ gap: 10 }}>
             <Text
               selectable
-              style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 18, fontWeight: "900" }}
+              style={{
+                color: isDark ? "#f3fbf6" : "#17231f",
+                fontSize: 18,
+                fontWeight: "900",
+              }}
             >
               Proximas Actividades
             </Text>
@@ -245,17 +305,38 @@ function LevelCard({
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
         <Text style={{ fontSize: 14 }}>🛡️</Text>
-        <Text style={{ color: "#bfe8d2", fontSize: 12, fontWeight: "800", letterSpacing: 0.4 }}>
+        <Text
+          style={{
+            color: "#bfe8d2",
+            fontSize: 12,
+            fontWeight: "800",
+            letterSpacing: 0.4,
+          }}
+        >
           NIVEL ACTUAL
         </Text>
       </View>
 
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 6 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          flexWrap: "wrap",
+          gap: 6,
+        }}
+      >
         <Text
           numberOfLines={1}
           adjustsFontSizeToFit
           minimumFontScale={0.8}
-          style={{ color: "#ffffff", fontSize: 22, fontWeight: "900", flexShrink: 1, minWidth: 100 }}
+          style={{
+            color: "#ffffff",
+            fontSize: 22,
+            fontWeight: "900",
+            flexShrink: 1,
+            minWidth: 100,
+          }}
         >
           {levelInfo.current.name}
         </Text>
@@ -263,7 +344,12 @@ function LevelCard({
           numberOfLines={1}
           adjustsFontSizeToFit
           minimumFontScale={0.7}
-          style={{ color: "#ffffff", fontSize: 18, fontWeight: "900", flexShrink: 1 }}
+          style={{
+            color: "#ffffff",
+            fontSize: 18,
+            fontWeight: "900",
+            flexShrink: 1,
+          }}
         >
           {new Intl.NumberFormat("es-DO").format(points)}
           <Text style={{ fontSize: 11, fontWeight: "700" }}> pts totales</Text>
@@ -303,9 +389,24 @@ function QuickActions() {
   const isDark = colorScheme === "dark";
 
   const actions = [
-    { label: "Ver mapa", icon: "map-outline" as const, href: "/(tabs)/mapa" as const, tint: "#1d6fa5" },
-    { label: "Reciclar ahora", icon: "leaf-outline" as const, href: "/(tabs)/mapa" as const, tint: "#28734f" },
-    { label: "Canjear Recompensas", icon: "gift-outline" as const, href: "/(tabs)/recompensas" as const, tint: "#c07a1f" },
+    {
+      label: "Ver mapa",
+      icon: "map-outline" as const,
+      href: "/(tabs)/mapa" as const,
+      tint: "#1d6fa5",
+    },
+    {
+      label: "Reciclar ahora",
+      icon: "leaf-outline" as const,
+      href: "/(tabs)/mapa" as const,
+      tint: "#28734f",
+    },
+    {
+      label: "Canjear Recompensas",
+      icon: "gift-outline" as const,
+      href: "/(tabs)/recompensas" as const,
+      tint: "#c07a1f",
+    },
   ];
 
   return (
@@ -363,9 +464,24 @@ function ImpactStats({ profile }: { profile: UserProfile | null }) {
   const isDark = colorScheme === "dark";
 
   const stats = [
-    { label: "Misiones completadas", value: profile?.completed_missions ?? 0, icon: "checkmark-done-circle-outline" as const, color: "#28734f" },
-    { label: "Puntos acumulados", value: profile?.total_points_earned ?? 0, icon: "trending-up-outline" as const, color: "#1d6fa5" },
-    { label: "Puntos disponibles", value: profile?.points ?? 0, icon: "star-outline" as const, color: "#c07a1f" },
+    {
+      label: "Misiones completadas",
+      value: profile?.completed_missions ?? 0,
+      icon: "checkmark-done-circle-outline" as const,
+      color: "#28734f",
+    },
+    {
+      label: "Puntos acumulados",
+      value: profile?.total_points_earned ?? 0,
+      icon: "trending-up-outline" as const,
+      color: "#1d6fa5",
+    },
+    {
+      label: "Puntos disponibles",
+      value: profile?.points ?? 0,
+      icon: "star-outline" as const,
+      color: "#c07a1f",
+    },
   ];
 
   return (
@@ -391,11 +507,18 @@ function ImpactStats({ profile }: { profile: UserProfile | null }) {
             numberOfLines={1}
             adjustsFontSizeToFit
             minimumFontScale={0.55}
-            style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 15, fontWeight: "900" }}
+            style={{
+              color: isDark ? "#f3fbf6" : "#17231f",
+              fontSize: 15,
+              fontWeight: "900",
+            }}
           >
             {new Intl.NumberFormat("es-DO").format(stat.value)}
           </Text>
-          <Text style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 11 }} numberOfLines={2}>
+          <Text
+            style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 11 }}
+            numberOfLines={2}
+          >
             {stat.label}
           </Text>
         </View>
@@ -409,7 +532,10 @@ function RecommendedMissionCard({ mission }: { mission: Mission }) {
   const isDark = colorScheme === "dark";
 
   return (
-    <Link href={{ pathname: "/mission/[id]", params: { id: mission.id } }} asChild>
+    <Link
+      href={{ pathname: "/mission/[id]", params: { id: mission.id } }}
+      asChild
+    >
       <Pressable
         style={{
           width: 200,
@@ -455,7 +581,12 @@ function RecommendedMissionCard({ mission }: { mission: Mission }) {
           <Text
             selectable
             numberOfLines={2}
-            style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 13, fontWeight: "900", lineHeight: 17 }}
+            style={{
+              color: isDark ? "#f3fbf6" : "#17231f",
+              fontSize: 13,
+              fontWeight: "900",
+              lineHeight: 17,
+            }}
           >
             {mission.title}
           </Text>
@@ -469,7 +600,9 @@ function RecommendedMissionCard({ mission }: { mission: Mission }) {
               backgroundColor: "#0f5f43",
             }}
           >
-            <Text style={{ color: "#ffffff", fontSize: 11, fontWeight: "900" }}>Unirse a la mision</Text>
+            <Text style={{ color: "#ffffff", fontSize: 11, fontWeight: "900" }}>
+              Unirse a la mision
+            </Text>
           </View>
         </View>
       </Pressable>
@@ -483,7 +616,10 @@ function UpcomingMissionRow({ mission }: { mission: Mission }) {
   const date = mission.start_date ? new Date(mission.start_date) : null;
 
   return (
-    <Link href={{ pathname: "/mission/[id]", params: { id: mission.id } }} asChild>
+    <Link
+      href={{ pathname: "/mission/[id]", params: { id: mission.id } }}
+      asChild
+    >
       <Pressable
         style={{
           flexDirection: "row",
@@ -506,10 +642,26 @@ function UpcomingMissionRow({ mission }: { mission: Mission }) {
             paddingVertical: 8,
           }}
         >
-          <Text style={{ color: isDark ? "#dce8e1" : "#34483e", fontSize: 10, fontWeight: "800" }}>
-            {date ? new Intl.DateTimeFormat("es-DO", { month: "short" }).format(date).toUpperCase() : "---"}
+          <Text
+            style={{
+              color: isDark ? "#dce8e1" : "#34483e",
+              fontSize: 10,
+              fontWeight: "800",
+            }}
+          >
+            {date
+              ? new Intl.DateTimeFormat("es-DO", { month: "short" })
+                  .format(date)
+                  .toUpperCase()
+              : "---"}
           </Text>
-          <Text style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 16, fontWeight: "900" }}>
+          <Text
+            style={{
+              color: isDark ? "#f3fbf6" : "#17231f",
+              fontSize: 16,
+              fontWeight: "900",
+            }}
+          >
             {date ? date.getDate() : "-"}
           </Text>
         </View>
@@ -518,11 +670,18 @@ function UpcomingMissionRow({ mission }: { mission: Mission }) {
           <Text
             selectable
             numberOfLines={1}
-            style={{ color: isDark ? "#f3fbf6" : "#17231f", fontSize: 14, fontWeight: "800" }}
+            style={{
+              color: isDark ? "#f3fbf6" : "#17231f",
+              fontSize: 14,
+              fontWeight: "800",
+            }}
           >
             {mission.title}
           </Text>
-          <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 12 }}>
+          <Text
+            selectable
+            style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 12 }}
+          >
             {formatMissionDate(mission.start_date)}
             {typeof mission.registered_count === "number"
               ? ` · ${mission.registered_count} inscritos`
@@ -530,7 +689,9 @@ function UpcomingMissionRow({ mission }: { mission: Mission }) {
           </Text>
         </View>
 
-        <Text style={{ color: isDark ? "#9fb0a7" : "#63786e", fontSize: 16 }}>›</Text>
+        <Text style={{ color: isDark ? "#9fb0a7" : "#63786e", fontSize: 16 }}>
+          ›
+        </Text>
       </Pressable>
     </Link>
   );
@@ -551,7 +712,10 @@ function EmptyStateCard({ message }: { message: string }) {
         alignItems: "center",
       }}
     >
-      <Text selectable style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 13 }}>
+      <Text
+        selectable
+        style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 13 }}
+      >
         {message}
       </Text>
     </View>
