@@ -49,7 +49,7 @@ export default function AgentTabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="perfil"
+        name="agente-perfil"
         options={{
           title: "Perfil",
           tabBarIcon: ({ color, focused }) => (
