@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
 import type { ComponentProps } from "react";
 import { type ColorValue, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppTopBarTitle } from "@/components/navigation/app-top-bar-title";
 
@@ -10,6 +11,8 @@ const BAR_BORDER = "#d7dde0";
 
 export default function AgentTabsLayout() {
   const isDark = false;
+  const insets = useSafeAreaInsets();
+  const tabBarBottomInset = Math.max(insets.bottom, 6);
 
   return (
     <Tabs
@@ -30,9 +33,9 @@ export default function AgentTabsLayout() {
           fontWeight: "500",
         },
         tabBarStyle: {
-          height: 64,
+          height: 58 + tabBarBottomInset,
           paddingTop: 7,
-          paddingBottom: 6,
+          paddingBottom: tabBarBottomInset,
           backgroundColor: isDark ? "#ffffff" : "#ffffff",
           borderTopColor: isDark ? "#26332f" : BAR_BORDER,
           borderTopWidth: 1,
