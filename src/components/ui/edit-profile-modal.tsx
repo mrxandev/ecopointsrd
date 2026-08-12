@@ -11,6 +11,15 @@ import {
 } from "react-native";
 import { MunicipalitySelect, ProvinceSelect } from "./geography-selectors";
 
+// Dominican phone formatter
+function formatDominicanPhone(value: string): string {
+  const cleaned = value.replace(/\D/g, "").slice(0, 10);
+  if (cleaned.length === 0) return "";
+  if (cleaned.length <= 3) return cleaned;
+  if (cleaned.length <= 6) return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`;
+  return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+}
+
 const palette = {
   background: "#f9f9ff",
   surface: "#ffffff",
@@ -279,10 +288,13 @@ export function EditProfileModal({
             <FormField
               label="Teléfono"
               value={form.phone}
-              onChangeText={(value) => onChange("phone", value)}
+              onChangeText={(value) =>
+                onChange("phone", formatDominicanPhone(value))
+              }
               placeholder="Tu número de teléfono"
               icon="call-outline"
               keyboardType="phone-pad"
+              maxLength={12}
             />
 
             <ProvinceSelect
@@ -395,6 +407,7 @@ interface FormFieldProps {
   icon?: string;
   keyboardType?: "default" | "phone-pad" | "number-pad" | "email-address";
   multiline?: boolean;
+  maxLength?: number;
 }
 
 function FormField({
@@ -405,6 +418,7 @@ function FormField({
   icon,
   keyboardType = "default",
   multiline = false,
+  maxLength,
 }: FormFieldProps) {
   return (
     <View style={{ gap: 6 }}>
@@ -453,6 +467,7 @@ function FormField({
           keyboardType={keyboardType}
           multiline={multiline}
           numberOfLines={multiline ? 3 : 1}
+          maxLength={maxLength}
           style={{
             flex: 1,
             minHeight: multiline ? 70 : 46,
