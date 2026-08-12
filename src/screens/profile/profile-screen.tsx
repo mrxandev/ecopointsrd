@@ -8,12 +8,11 @@ import {
     RefreshControl,
     ScrollView,
     Text,
-    TextInput,
     View,
 } from "react-native";
 
 import { BadgeDetailModal } from "@/components/ui/badge-detail-modal";
-import { ImageSelector } from "@/components/ui/image-selector";
+import { EditProfileModal } from "@/components/ui/edit-profile-modal";
 import { useAuth } from "@/hooks/use-auth";
 import {
     BADGES_CATALOG,
@@ -173,6 +172,21 @@ export function ProfileScreen() {
       clearTimeout(timeout);
     };
   }, [loadProfile]);
+
+  // Auto-clear message after 3 seconds
+  useEffect(() => {
+    if (!message) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setMessage(null);
+    }, 3000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [message]);
 
   const activeProfile = profile ?? {
     id: user?.id ?? "",
@@ -481,10 +495,12 @@ export function ProfileScreen() {
           </View>
 
           {isEditing ? (
-            <EditProfileForm
+            <EditProfileModal
+              visible={isEditing}
+              profile={activeProfile}
               form={form}
               isSaving={isSaving}
-              onCancel={() => setIsEditing(false)}
+              onClose={() => setIsEditing(false)}
               onChange={(field, value) =>
                 setForm((current) => ({ ...current, [field]: value }))
               }
@@ -1026,133 +1042,6 @@ function MenuIcon({ color, name }: { color: string; name: MenuIconName }) {
           transform: [{ rotate: "45deg" }],
           ...stroke,
         }}
-      />
-    </View>
-  );
-}
-
-function EditProfileForm({
-  form,
-  isSaving,
-  onCancel,
-  onChange,
-  onSave,
-}: {
-  form: EditableProfile;
-  isSaving: boolean;
-  onCancel: () => void;
-  onChange: (field: keyof EditableProfile, value: string) => void;
-  onSave: () => void;
-}) {
-  return (
-    <View style={{ gap: 10 }}>
-      <EditableInput
-        label="Nombre"
-        value={form.first_name ?? ""}
-        onChangeText={(value) => onChange("first_name", value)}
-      />
-      <EditableInput
-        label="Apellido"
-        value={form.last_name ?? ""}
-        onChangeText={(value) => onChange("last_name", value)}
-      />
-      <EditableInput
-        label="Telefono"
-        value={form.phone ?? ""}
-        onChangeText={(value) => onChange("phone", value)}
-      />
-      <EditableInput
-        label="Provincia"
-        value={form.province ?? ""}
-        onChangeText={(value) => onChange("province", value)}
-      />
-      <EditableInput
-        label="Municipio"
-        value={form.municipality ?? ""}
-        onChangeText={(value) => onChange("municipality", value)}
-      />
-      <EditableInput
-        label="Direccion"
-        value={form.address ?? ""}
-        onChangeText={(value) => onChange("address", value)}
-      />
-      <ImageSelector
-        value={form.profile_image ?? null}
-        onChange={(value) => onChange("profile_image", value)}
-      />
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        <Pressable
-          accessibilityRole="button"
-          onPress={onCancel}
-          style={{
-            flex: 1,
-            minHeight: 46,
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 8,
-            backgroundColor: "#f1f3ff",
-          }}
-        >
-          <Text style={{ color: palette.textMuted, fontWeight: "900" }}>
-            Cancelar
-          </Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          disabled={isSaving}
-          onPress={onSave}
-          style={{
-            flex: 1,
-            minHeight: 46,
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 8,
-            backgroundColor: isSaving ? "#90a79b" : palette.primary,
-          }}
-        >
-          {isSaving ? (
-            <ActivityIndicator color="#ffffff" />
-          ) : (
-            <Text style={{ color: "#ffffff", fontWeight: "900" }}>Guardar</Text>
-          )}
-        </Pressable>
-      </View>
-    </View>
-  );
-}
-
-function EditableInput({
-  label,
-  onChangeText,
-  value,
-}: {
-  label: string;
-  onChangeText: (value: string) => void;
-  value: string;
-}) {
-  const isDark = false;
-
-  return (
-    <View style={{ gap: 5 }}>
-      <Text
-        selectable
-        style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 12 }}
-      >
-        {label}
-      </Text>
-      <TextInput
-        onChangeText={onChangeText}
-        style={{
-          minHeight: 46,
-          borderRadius: 8,
-          borderWidth: 1,
-          borderColor: isDark ? "#314139" : palette.outline,
-          backgroundColor: isDark ? "#ffffff" : palette.surface,
-          color: isDark ? "#ffffff" : palette.text,
-          paddingHorizontal: 12,
-          fontSize: 14,
-        }}
-        value={value}
       />
     </View>
   );
