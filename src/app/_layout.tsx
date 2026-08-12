@@ -4,7 +4,7 @@ import { Stack } from "expo-router/stack";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar as ExpoStatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { StatusBar as NativeStatusBar } from "react-native";
+import { BackHandler, Platform, StatusBar as NativeStatusBar } from "react-native";
 
 import { AppTopBarTitle } from "@/components/navigation/app-top-bar-title";
 import { MissionBackButton } from "@/components/navigation/mission-back-button";
@@ -76,6 +76,23 @@ function RootNavigator() {
       router.replace("/validar");
     }
   }, [isAuthenticated, isLoading, role, router, segments]);
+
+  useEffect(() => {
+    if (Platform.OS !== "android") {
+      return;
+    }
+
+    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+      if (router.canGoBack()) {
+        router.back();
+        return true;
+      }
+
+      return false;
+    });
+
+    return () => subscription.remove();
+  }, [router]);
 
   useEffect(() => {
     if (!isLoading) {
