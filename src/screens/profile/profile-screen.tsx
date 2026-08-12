@@ -1,30 +1,31 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
+    ActivityIndicator,
+    Pressable,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
-import { Image } from "expo-image";
 
 import { BadgeDetailModal } from "@/components/ui/badge-detail-modal";
+import { ImageSelector } from "@/components/ui/image-selector";
 import { useAuth } from "@/hooks/use-auth";
 import {
-  BADGES_CATALOG,
-  type BadgeDefinition,
-  getBadgeStatus,
+    BADGES_CATALOG,
+    type BadgeDefinition,
+    getBadgeStatus,
 } from "@/services/badge-service";
 import {
-  getMyPoints,
-  getMyProfile,
-  getUserRanking,
-  type UserProfile,
-  updateMyProfile,
+    type UserProfile,
+    getMyPoints,
+    getMyProfile,
+    getUserRanking,
+    updateMyProfile,
 } from "@/services/user-service";
 import { getLevelProgress } from "@/utils/level";
 
@@ -49,15 +50,26 @@ const palette = {
 
 type EditableProfile = Pick<
   UserProfile,
-  "first_name" | "last_name" | "phone" | "province" | "municipality" | "address" | "profile_image"
+  | "first_name"
+  | "last_name"
+  | "phone"
+  | "province"
+  | "municipality"
+  | "address"
+  | "profile_image"
 >;
 
-function getDisplayName(user: Pick<UserProfile, "first_name" | "last_name" | "email"> | null) {
+function getDisplayName(
+  user: Pick<UserProfile, "first_name" | "last_name" | "email"> | null,
+) {
   if (!user) {
     return "Usuario";
   }
 
-  const fullName = [user.first_name, user.last_name].filter(Boolean).join(" ").trim();
+  const fullName = [user.first_name, user.last_name]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
 
   return fullName || user.email;
 }
@@ -82,7 +94,9 @@ export function ProfileScreen() {
     address: "",
     profile_image: "",
   });
-  const [selectedBadge, setSelectedBadge] = useState<BadgeDefinition | null>(null);
+  const [selectedBadge, setSelectedBadge] = useState<BadgeDefinition | null>(
+    null,
+  );
 
   const loadProfile = useCallback(
     async (mode: "initial" | "refresh" = "initial") => {
@@ -104,20 +118,27 @@ export function ProfileScreen() {
         const [nextProfile, nextPoints, ranking] = await Promise.all([
           getMyProfile(token),
           getMyPoints(token),
-          getUserRanking(token).catch(() => ({ users: [], currentUserRank: null })),
+          getUserRanking(token).catch(() => ({
+            users: [],
+            currentUserRank: null,
+          })),
         ]);
         const mergedProfile = {
           ...nextProfile,
           points: nextPoints.points ?? nextProfile.points,
-          total_points_earned: nextPoints.total_points_earned ?? nextProfile.total_points_earned,
+          total_points_earned:
+            nextPoints.total_points_earned ?? nextProfile.total_points_earned,
           total_points_redeemed:
-            nextPoints.total_points_redeemed ?? nextProfile.total_points_redeemed,
+            nextPoints.total_points_redeemed ??
+            nextProfile.total_points_redeemed,
         };
 
         setProfile(mergedProfile);
         setNationalRank(
           ranking.currentUserRank ??
-            ranking.users.find((rankingUser) => rankingUser.id === mergedProfile.id)?.rank ??
+            ranking.users.find(
+              (rankingUser) => rankingUser.id === mergedProfile.id,
+            )?.rank ??
             null,
         );
         setForm({
@@ -131,7 +152,9 @@ export function ProfileScreen() {
         });
       } catch (profileError) {
         setError(
-          profileError instanceof Error ? profileError : new Error("No pudimos cargar tu perfil."),
+          profileError instanceof Error
+            ? profileError
+            : new Error("No pudimos cargar tu perfil."),
         );
       } finally {
         setIsLoading(false);
@@ -175,7 +198,10 @@ export function ProfileScreen() {
     [activeProfile.completed_missions],
   );
 
-  const levelInfo = useMemo(() => getLevelProgress(activeProfile.points), [activeProfile.points]);
+  const levelInfo = useMemo(
+    () => getLevelProgress(activeProfile.points),
+    [activeProfile.points],
+  );
 
   async function handleSave() {
     if (!token) {
@@ -200,7 +226,11 @@ export function ProfileScreen() {
       setIsEditing(false);
       setMessage("Perfil actualizado correctamente.");
     } catch (saveError) {
-      setMessage(saveError instanceof Error ? saveError.message : "No pudimos actualizar tu perfil.");
+      setMessage(
+        saveError instanceof Error
+          ? saveError.message
+          : "No pudimos actualizar tu perfil.",
+      );
     } finally {
       setIsSaving(false);
     }
@@ -210,13 +240,26 @@ export function ProfileScreen() {
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       refreshControl={
-        <RefreshControl refreshing={isRefreshing} onRefresh={() => void loadProfile("refresh")} />
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={() => void loadProfile("refresh")}
+        />
       }
-      style={{ flex: 1, backgroundColor: isDark ? "#f9f9ff" : palette.background }}
+      style={{
+        flex: 1,
+        backgroundColor: isDark ? "#f9f9ff" : palette.background,
+      }}
       contentContainerStyle={{ padding: 16, paddingBottom: 92, gap: 14 }}
     >
       {isLoading ? (
-        <View style={{ minHeight: 360, alignItems: "center", justifyContent: "center", gap: 12 }}>
+        <View
+          style={{
+            minHeight: 360,
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 12,
+          }}
+        >
           <ActivityIndicator color={palette.primary} />
           <Text selectable style={{ color: isDark ? "#b8c7bf" : "#404943" }}>
             Cargando perfil...
@@ -227,9 +270,15 @@ export function ProfileScreen() {
       {!isLoading && error ? (
         <StateCard
           title={error.message}
-          actionLabel={error.name === "401" || error.name === "403" ? "Iniciar sesión otra vez" : "Reintentar"}
+          actionLabel={
+            error.name === "401" || error.name === "403"
+              ? "Iniciar sesión otra vez"
+              : "Reintentar"
+          }
           onAction={() =>
-            error.name === "401" || error.name === "403" ? void logout() : void loadProfile()
+            error.name === "401" || error.name === "403"
+              ? void logout()
+              : void loadProfile()
           }
           danger
         />
@@ -258,7 +307,13 @@ export function ProfileScreen() {
                   style={{ width: "100%", height: "100%" }}
                 />
               ) : (
-                <Text style={{ color: palette.primary, fontSize: 24, fontWeight: "900" }}>
+                <Text
+                  style={{
+                    color: palette.primary,
+                    fontSize: 24,
+                    fontWeight: "900",
+                  }}
+                >
                   {getDisplayName(activeProfile).slice(0, 1).toUpperCase()}
                 </Text>
               )}
@@ -274,9 +329,16 @@ export function ProfileScreen() {
               >
                 {getDisplayName(activeProfile)}
               </Text>
-              <Text selectable style={{ color: isDark ? "#b8c7bf" : palette.textMuted, fontSize: 12 }}>
-                {[activeProfile.municipality, activeProfile.province].filter(Boolean).join(", ") ||
-                  "Ubicacion sin completar"}
+              <Text
+                selectable
+                style={{
+                  color: isDark ? "#b8c7bf" : palette.textMuted,
+                  fontSize: 12,
+                }}
+              >
+                {[activeProfile.municipality, activeProfile.province]
+                  .filter(Boolean)
+                  .join(", ") || "Ubicacion sin completar"}
               </Text>
               <View
                 style={{
@@ -286,7 +348,13 @@ export function ProfileScreen() {
                   paddingVertical: 4,
                 }}
               >
-                <Text style={{ color: palette.primary, fontSize: 11, fontWeight: "900" }}>
+                <Text
+                  style={{
+                    color: palette.primary,
+                    fontSize: 11,
+                    fontWeight: "900",
+                  }}
+                >
                   {levelInfo.current.name}
                 </Text>
               </View>
@@ -294,7 +362,10 @@ export function ProfileScreen() {
           </View>
 
           <View style={{ flexDirection: "row", gap: 8 }}>
-            <StatCard label="Puntos" value={formatNumber(activeProfile.points)} />
+            <StatCard
+              label="Puntos"
+              value={formatNumber(activeProfile.points)}
+            />
             <StatCard label="Actual" value={`Nivel ${levelInfo.levelNumber}`} />
             <StatCard
               label="Nacional"
@@ -325,25 +396,53 @@ export function ProfileScreen() {
                 borderColor: "rgba(168, 231, 197, 0.22)",
               }}
             />
-            <Text selectable style={{ color: "#ffffff", fontSize: 15, fontWeight: "900" }}>
+            <Text
+              selectable
+              style={{ color: "#ffffff", fontSize: 15, fontWeight: "900" }}
+            >
               Tu Impacto Acumulado
             </Text>
-            <ImpactRow label="Arboles Plantados" value={formatNumber(impact.trees)} />
-            <ImpactRow label="Kg reciclados" value={formatNumber(impact.recycling)} />
-            <ImpactRow label="Horas Voluntariado" value={`${formatNumber(impact.hours)}h`} />
+            <ImpactRow
+              label="Arboles Plantados"
+              value={formatNumber(impact.trees)}
+            />
+            <ImpactRow
+              label="Kg reciclados"
+              value={formatNumber(impact.recycling)}
+            />
+            <ImpactRow
+              label="Horas Voluntariado"
+              value={`${formatNumber(impact.hours)}h`}
+            />
           </View>
 
           <View style={{ gap: 10 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
               <Text
                 selectable
-                style={{ color: isDark ? "#f3fbf6" : palette.text, fontSize: 16, fontWeight: "900" }}
+                style={{
+                  color: isDark ? "#f3fbf6" : palette.text,
+                  fontSize: 16,
+                  fontWeight: "900",
+                }}
               >
                 Insignias recientes
               </Text>
               <Link href="/badges" asChild>
                 <Pressable accessibilityRole="button">
-                  <Text style={{ color: palette.primary, fontSize: 11, fontWeight: "900" }}>
+                  <Text
+                    style={{
+                      color: palette.primary,
+                      fontSize: 11,
+                      fontWeight: "900",
+                    }}
+                  >
                     Ver todas
                   </Text>
                 </Pressable>
@@ -361,9 +460,19 @@ export function ProfileScreen() {
                   >
                     <Badge
                       active={status.isUnlocked}
-                      iconName={status.isUnlocked ? badge.iconName : "lock-closed-outline"}
+                      iconName={
+                        status.isUnlocked
+                          ? badge.iconName
+                          : "lock-closed-outline"
+                      }
                       label={badge.title}
-                      tone={badge.tone === "blue" ? "blue" : badge.tone === "green" ? "green" : "gray"}
+                      tone={
+                        badge.tone === "blue"
+                          ? "blue"
+                          : badge.tone === "green"
+                            ? "green"
+                            : "gray"
+                      }
                     />
                   </Pressable>
                 );
@@ -376,12 +485,19 @@ export function ProfileScreen() {
               form={form}
               isSaving={isSaving}
               onCancel={() => setIsEditing(false)}
-              onChange={(field, value) => setForm((current) => ({ ...current, [field]: value }))}
+              onChange={(field, value) =>
+                setForm((current) => ({ ...current, [field]: value }))
+              }
               onSave={handleSave}
             />
           ) : null}
 
-          {message ? <InlineMessage message={message} success={!message.includes("No pudimos")} /> : null}
+          {message ? (
+            <InlineMessage
+              message={message}
+              success={!message.includes("No pudimos")}
+            />
+          ) : null}
 
           <View
             style={{
@@ -393,7 +509,11 @@ export function ProfileScreen() {
               boxShadow: "0 2px 8px rgba(20, 27, 43, 0.06)",
             }}
           >
-            <MenuRow label="Editar perfil" icon="edit" onPress={() => setIsEditing((value) => !value)} />
+            <MenuRow
+              label="Editar perfil"
+              icon="edit"
+              onPress={() => setIsEditing((value) => !value)}
+            />
             <Link href="/recompensas" asChild>
               <MenuRow label="Recompensas" icon="rewards" />
             </Link>
@@ -404,7 +524,12 @@ export function ProfileScreen() {
               <MenuRow label="Ranking nacional" icon="ranking" />
             </Link>
             <MenuRow label="Privacidad" icon="privacy" />
-            <MenuRow label="Cerrar sesion" icon="logout" danger onPress={logout} />
+            <MenuRow
+              label="Cerrar sesion"
+              icon="logout"
+              danger
+              onPress={logout}
+            />
           </View>
 
           <BadgeDetailModal
@@ -423,7 +548,15 @@ function formatNumber(value: number) {
   return new Intl.NumberFormat("es-DO").format(value);
 }
 
-function StatCard({ accent, label, value }: { accent?: "blue"; label: string; value: string }) {
+function StatCard({
+  accent,
+  label,
+  value,
+}: {
+  accent?: "blue";
+  label: string;
+  value: string;
+}) {
   const isDark = false;
   const valueColor = accent === "blue" ? palette.tertiary : palette.primaryDark;
 
@@ -449,11 +582,23 @@ function StatCard({ accent, label, value }: { accent?: "blue"; label: string; va
         numberOfLines={1}
         adjustsFontSizeToFit
         minimumFontScale={0.55}
-        style={{ color: isDark ? "#f3fbf6" : valueColor, fontSize: 16, fontWeight: "900" }}
+        style={{
+          color: isDark ? "#f3fbf6" : valueColor,
+          fontSize: 16,
+          fontWeight: "900",
+        }}
       >
         {value}
       </Text>
-      <Text selectable style={{ color: isDark ? "#b8c7bf" : palette.textMuted, fontSize: 11, textAlign: "center" }} numberOfLines={1}>
+      <Text
+        selectable
+        style={{
+          color: isDark ? "#b8c7bf" : palette.textMuted,
+          fontSize: 11,
+          textAlign: "center",
+        }}
+        numberOfLines={1}
+      >
         {label}
       </Text>
     </View>
@@ -462,11 +607,23 @@ function StatCard({ accent, label, value }: { accent?: "blue"; label: string; va
 
 function ImpactRow({ label, value }: { label: string; value: string }) {
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-      <Text selectable style={{ color: "#e7fff0", fontSize: 13, fontWeight: "700" }}>
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
+    >
+      <Text
+        selectable
+        style={{ color: "#e7fff0", fontSize: 13, fontWeight: "700" }}
+      >
         {label}
       </Text>
-      <Text selectable style={{ color: "#ffffff", fontSize: 14, fontWeight: "900" }}>
+      <Text
+        selectable
+        style={{ color: "#ffffff", fontSize: 14, fontWeight: "900" }}
+      >
         {value}
       </Text>
     </View>
@@ -486,11 +643,22 @@ function Badge({
 }) {
   const isDark = false;
   const activeBackground =
-    tone === "green" ? palette.primarySoft : tone === "blue" ? palette.tertiarySoft : palette.surfaceVariant;
+    tone === "green"
+      ? palette.primarySoft
+      : tone === "blue"
+        ? palette.tertiarySoft
+        : palette.surfaceVariant;
   const activeColor = tone === "blue" ? palette.tertiary : palette.primary;
 
   return (
-    <View style={{ flex: 1, alignItems: "center", gap: 6, opacity: active ? 1 : 0.5 }}>
+    <View
+      style={{
+        flex: 1,
+        alignItems: "center",
+        gap: 6,
+        opacity: active ? 1 : 0.5,
+      }}
+    >
       <View
         style={{
           width: 48,
@@ -500,10 +668,18 @@ function Badge({
           borderRadius: 999,
           borderWidth: 1,
           borderColor: active ? palette.outlineVariant : "transparent",
-          backgroundColor: active ? activeBackground : isDark ? "#ffffff" : palette.surfaceLow,
+          backgroundColor: active
+            ? activeBackground
+            : isDark
+              ? "#ffffff"
+              : palette.surfaceLow,
         }}
       >
-        <Ionicons name={iconName} size={22} color={active ? activeColor : "#7b8982"} />
+        <Ionicons
+          name={iconName}
+          size={22}
+          color={active ? activeColor : "#7b8982"}
+        />
       </View>
       <Text
         selectable
@@ -547,7 +723,10 @@ function MenuRow({
         gap: 12,
       }}
     >
-      <MenuIcon color={danger ? palette.error : palette.primaryDark} name={icon} />
+      <MenuIcon
+        color={danger ? palette.error : palette.primaryDark}
+        name={icon}
+      />
       <Text
         style={{
           flex: 1,
@@ -558,19 +737,34 @@ function MenuRow({
       >
         {label}
       </Text>
-      {!danger ? <Text style={{ color: isDark ? "#9fb0a7" : "#404943" }}>{">"}</Text> : null}
+      {!danger ? (
+        <Text style={{ color: isDark ? "#9fb0a7" : "#404943" }}>{">"}</Text>
+      ) : null}
     </Pressable>
   );
 }
 
-type MenuIconName = "edit" | "history" | "logout" | "privacy" | "ranking" | "rewards";
+type MenuIconName =
+  | "edit"
+  | "history"
+  | "logout"
+  | "privacy"
+  | "ranking"
+  | "rewards";
 
 function MenuIcon({ color, name }: { color: string; name: MenuIconName }) {
   const stroke = { borderColor: color };
 
   if (name === "edit") {
     return (
-      <View style={{ width: 18, height: 18, alignItems: "center", justifyContent: "center" }}>
+      <View
+        style={{
+          width: 18,
+          height: 18,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <View
           style={{
             width: 13,
@@ -600,22 +794,86 @@ function MenuIcon({ color, name }: { color: string; name: MenuIconName }) {
 
   if (name === "rewards") {
     return (
-      <View style={{ width: 18, height: 18, alignItems: "center", justifyContent: "center" }}>
-        <View style={{ position: "absolute", top: 3, flexDirection: "row", gap: 1 }}>
-          <View style={{ width: 5, height: 5, borderWidth: 1.5, borderRadius: 99, ...stroke }} />
-          <View style={{ width: 5, height: 5, borderWidth: 1.5, borderRadius: 99, ...stroke }} />
+      <View
+        style={{
+          width: 18,
+          height: 18,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <View
+          style={{ position: "absolute", top: 3, flexDirection: "row", gap: 1 }}
+        >
+          <View
+            style={{
+              width: 5,
+              height: 5,
+              borderWidth: 1.5,
+              borderRadius: 99,
+              ...stroke,
+            }}
+          />
+          <View
+            style={{
+              width: 5,
+              height: 5,
+              borderWidth: 1.5,
+              borderRadius: 99,
+              ...stroke,
+            }}
+          />
         </View>
-        <View style={{ width: 15, height: 5, borderWidth: 1.5, borderRadius: 2, ...stroke }} />
-        <View style={{ width: 13, height: 8, borderWidth: 1.5, borderTopWidth: 0, ...stroke }} />
-        <View style={{ position: "absolute", bottom: 3, width: 1.5, height: 12, backgroundColor: color }} />
+        <View
+          style={{
+            width: 15,
+            height: 5,
+            borderWidth: 1.5,
+            borderRadius: 2,
+            ...stroke,
+          }}
+        />
+        <View
+          style={{
+            width: 13,
+            height: 8,
+            borderWidth: 1.5,
+            borderTopWidth: 0,
+            ...stroke,
+          }}
+        />
+        <View
+          style={{
+            position: "absolute",
+            bottom: 3,
+            width: 1.5,
+            height: 12,
+            backgroundColor: color,
+          }}
+        />
       </View>
     );
   }
 
   if (name === "history") {
     return (
-      <View style={{ width: 18, height: 18, alignItems: "center", justifyContent: "center" }}>
-        <View style={{ width: 13, height: 13, borderWidth: 1.6, borderRadius: 99, ...stroke }} />
+      <View
+        style={{
+          width: 18,
+          height: 18,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <View
+          style={{
+            width: 13,
+            height: 13,
+            borderWidth: 1.6,
+            borderRadius: 99,
+            ...stroke,
+          }}
+        />
         <View
           style={{
             position: "absolute",
@@ -629,7 +887,14 @@ function MenuIcon({ color, name }: { color: string; name: MenuIconName }) {
             ...stroke,
           }}
         />
-        <View style={{ position: "absolute", width: 1.5, height: 5, backgroundColor: color }} />
+        <View
+          style={{
+            position: "absolute",
+            width: 1.5,
+            height: 5,
+            backgroundColor: color,
+          }}
+        />
         <View
           style={{
             position: "absolute",
@@ -645,7 +910,14 @@ function MenuIcon({ color, name }: { color: string; name: MenuIconName }) {
 
   if (name === "privacy") {
     return (
-      <View style={{ width: 18, height: 18, alignItems: "center", justifyContent: "center" }}>
+      <View
+        style={{
+          width: 18,
+          height: 18,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <View
           style={{
             width: 12,
@@ -658,18 +930,64 @@ function MenuIcon({ color, name }: { color: string; name: MenuIconName }) {
             ...stroke,
           }}
         />
-        <View style={{ position: "absolute", top: 6, width: 3, height: 3, borderRadius: 99, backgroundColor: color }} />
-        <View style={{ position: "absolute", top: 9, width: 1.5, height: 4, backgroundColor: color }} />
+        <View
+          style={{
+            position: "absolute",
+            top: 6,
+            width: 3,
+            height: 3,
+            borderRadius: 99,
+            backgroundColor: color,
+          }}
+        />
+        <View
+          style={{
+            position: "absolute",
+            top: 9,
+            width: 1.5,
+            height: 4,
+            backgroundColor: color,
+          }}
+        />
       </View>
     );
   }
 
   if (name === "ranking") {
     return (
-      <View style={{ width: 18, height: 18, flexDirection: "row", alignItems: "flex-end", gap: 2 }}>
-        <View style={{ width: 4, height: 8, borderRadius: 1.5, backgroundColor: color }} />
-        <View style={{ width: 4, height: 15, borderRadius: 1.5, backgroundColor: color }} />
-        <View style={{ width: 4, height: 11, borderRadius: 1.5, backgroundColor: color }} />
+      <View
+        style={{
+          width: 18,
+          height: 18,
+          flexDirection: "row",
+          alignItems: "flex-end",
+          gap: 2,
+        }}
+      >
+        <View
+          style={{
+            width: 4,
+            height: 8,
+            borderRadius: 1.5,
+            backgroundColor: color,
+          }}
+        />
+        <View
+          style={{
+            width: 4,
+            height: 15,
+            borderRadius: 1.5,
+            backgroundColor: color,
+          }}
+        />
+        <View
+          style={{
+            width: 4,
+            height: 11,
+            borderRadius: 1.5,
+            backgroundColor: color,
+          }}
+        />
       </View>
     );
   }
@@ -688,7 +1006,15 @@ function MenuIcon({ color, name }: { color: string; name: MenuIconName }) {
           ...stroke,
         }}
       />
-      <View style={{ position: "absolute", left: 6, width: 8, height: 1.6, backgroundColor: color }} />
+      <View
+        style={{
+          position: "absolute",
+          left: 6,
+          width: 8,
+          height: 1.6,
+          backgroundColor: color,
+        }}
+      />
       <View
         style={{
           position: "absolute",
@@ -720,13 +1046,40 @@ function EditProfileForm({
 }) {
   return (
     <View style={{ gap: 10 }}>
-      <EditableInput label="Nombre" value={form.first_name ?? ""} onChangeText={(value) => onChange("first_name", value)} />
-      <EditableInput label="Apellido" value={form.last_name ?? ""} onChangeText={(value) => onChange("last_name", value)} />
-      <EditableInput label="Telefono" value={form.phone ?? ""} onChangeText={(value) => onChange("phone", value)} />
-      <EditableInput label="Provincia" value={form.province ?? ""} onChangeText={(value) => onChange("province", value)} />
-      <EditableInput label="Municipio" value={form.municipality ?? ""} onChangeText={(value) => onChange("municipality", value)} />
-      <EditableInput label="Direccion" value={form.address ?? ""} onChangeText={(value) => onChange("address", value)} />
-      <EditableInput label="Imagen de perfil URL" value={form.profile_image ?? ""} onChangeText={(value) => onChange("profile_image", value)} />
+      <EditableInput
+        label="Nombre"
+        value={form.first_name ?? ""}
+        onChangeText={(value) => onChange("first_name", value)}
+      />
+      <EditableInput
+        label="Apellido"
+        value={form.last_name ?? ""}
+        onChangeText={(value) => onChange("last_name", value)}
+      />
+      <EditableInput
+        label="Telefono"
+        value={form.phone ?? ""}
+        onChangeText={(value) => onChange("phone", value)}
+      />
+      <EditableInput
+        label="Provincia"
+        value={form.province ?? ""}
+        onChangeText={(value) => onChange("province", value)}
+      />
+      <EditableInput
+        label="Municipio"
+        value={form.municipality ?? ""}
+        onChangeText={(value) => onChange("municipality", value)}
+      />
+      <EditableInput
+        label="Direccion"
+        value={form.address ?? ""}
+        onChangeText={(value) => onChange("address", value)}
+      />
+      <ImageSelector
+        value={form.profile_image ?? null}
+        onChange={(value) => onChange("profile_image", value)}
+      />
       <View style={{ flexDirection: "row", gap: 10 }}>
         <Pressable
           accessibilityRole="button"
@@ -740,7 +1093,9 @@ function EditProfileForm({
             backgroundColor: "#f1f3ff",
           }}
         >
-          <Text style={{ color: palette.textMuted, fontWeight: "900" }}>Cancelar</Text>
+          <Text style={{ color: palette.textMuted, fontWeight: "900" }}>
+            Cancelar
+          </Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -779,7 +1134,10 @@ function EditableInput({
 
   return (
     <View style={{ gap: 5 }}>
-      <Text selectable style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 12 }}>
+      <Text
+        selectable
+        style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 12 }}
+      >
         {label}
       </Text>
       <TextInput
@@ -800,7 +1158,13 @@ function EditableInput({
   );
 }
 
-function InlineMessage({ message, success }: { message: string; success: boolean }) {
+function InlineMessage({
+  message,
+  success,
+}: {
+  message: string;
+  success: boolean;
+}) {
   return (
     <View
       style={{
@@ -809,7 +1173,13 @@ function InlineMessage({ message, success }: { message: string; success: boolean
         padding: 12,
       }}
     >
-      <Text selectable style={{ color: success ? palette.primaryDark : palette.error, fontWeight: "800" }}>
+      <Text
+        selectable
+        style={{
+          color: success ? palette.primaryDark : palette.error,
+          fontWeight: "800",
+        }}
+      >
         {message}
       </Text>
     </View>
@@ -838,7 +1208,10 @@ function StateCard({
         gap: 12,
       }}
     >
-      <Text selectable style={{ color: danger ? "#93000a" : palette.text, fontWeight: "800" }}>
+      <Text
+        selectable
+        style={{ color: danger ? "#93000a" : palette.text, fontWeight: "800" }}
+      >
         {title}
       </Text>
       <Pressable
@@ -852,9 +1225,10 @@ function StateCard({
           backgroundColor: palette.primary,
         }}
       >
-        <Text style={{ color: "#ffffff", fontWeight: "900" }}>{actionLabel}</Text>
+        <Text style={{ color: "#ffffff", fontWeight: "900" }}>
+          {actionLabel}
+        </Text>
       </Pressable>
     </View>
   );
 }
-
