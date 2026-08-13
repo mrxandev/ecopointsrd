@@ -12,7 +12,7 @@ import {
 } from "react-native";
 
 import { BadgeDetailModal } from "@/components/ui/badge-detail-modal";
-import { EditProfileModal } from "@/components/ui/edit-profile-modal";
+import { EditProfileModal, type EditProfileForm } from "@/components/ui/edit-profile-modal";
 import { useAuth } from "@/hooks/use-auth";
 import {
     BADGES_CATALOG,
@@ -84,7 +84,7 @@ export function ProfileScreen() {
   const [error, setError] = useState<Error | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [nationalRank, setNationalRank] = useState<number | null>(null);
-  const [form, setForm] = useState<EditableProfile>({
+  const [form, setForm] = useState<EditProfileForm>({
     first_name: "",
     last_name: "",
     phone: "",

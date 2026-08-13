@@ -33,7 +33,7 @@ function getGreetingName(profile: UserProfile | null, fallbackEmail?: string) {
 export function HomeScreen() {
   const { logout, token, user } = useAuth();
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = (colorScheme as string) === "dark";
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [missions, setMissions] = useState<Mission[]>([]);
@@ -386,7 +386,7 @@ function LevelCard({
 
 function QuickActions() {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = (colorScheme as string) === "dark";
 
   const actions = [
     {
@@ -461,7 +461,7 @@ function QuickActions() {
 
 function ImpactStats({ profile }: { profile: UserProfile | null }) {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = (colorScheme as string) === "dark";
 
   const stats = [
     {
@@ -529,7 +529,7 @@ function ImpactStats({ profile }: { profile: UserProfile | null }) {
 
 function RecommendedMissionCard({ mission }: { mission: Mission }) {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = (colorScheme as string) === "dark";
 
   return (
     <Link
@@ -612,7 +612,7 @@ function RecommendedMissionCard({ mission }: { mission: Mission }) {
 
 function UpcomingMissionRow({ mission }: { mission: Mission }) {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = (colorScheme as string) === "dark";
   const date = mission.start_date ? new Date(mission.start_date) : null;
 
   return (
@@ -699,7 +699,7 @@ function UpcomingMissionRow({ mission }: { mission: Mission }) {
 
 function EmptyStateCard({ message }: { message: string }) {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = (colorScheme as string) === "dark";
 
   return (
     <View
