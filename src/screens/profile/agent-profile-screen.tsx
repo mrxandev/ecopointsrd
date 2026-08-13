@@ -7,6 +7,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { Link } from "expo-router";
 import { Image } from "expo-image";
 
 import { EditProfileModal, type EditProfileForm } from "@/components/ui/edit-profile-modal";
@@ -318,7 +319,9 @@ export function AgentProfileScreen() {
             }}
           >
             <MenuRow label="Editar perfil" icon="edit" onPress={() => setIsEditing((value) => !value)} />
-            <MenuRow label="Privacidad" icon="privacy" />
+            <Link href="/privacy" asChild>
+              <MenuRow label="Privacidad" icon="privacy" />
+            </Link>
             <MenuRow label="Cerrar sesion" icon="logout" danger onPress={logout} />
           </View>
         </>

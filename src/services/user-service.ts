@@ -197,7 +197,7 @@ export async function getMyPointTransactions(token: string) {
   return data?.data?.transactions ?? [];
 }
 
-function normalizeRankingUser(user: Partial<RankingUser>, index: number): RankingUser {
+function normalizeRankingUser(user: any, index: number): RankingUser {
   const earnedPoints = user.total_points_earned ?? user.points ?? 0;
 
   return {
@@ -205,6 +205,7 @@ function normalizeRankingUser(user: Partial<RankingUser>, index: number): Rankin
     id: String(user.id ?? user.email ?? index + 1),
     points: user.points ?? earnedPoints,
     rank: user.rank ?? index + 1,
+    profile_image: user.profile_image || user.avatar_url || user.avatar || user.image_url || user.picture || user.image || null,
   };
 }
 

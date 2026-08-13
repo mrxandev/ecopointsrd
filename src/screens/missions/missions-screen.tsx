@@ -94,8 +94,18 @@ export function MissionsScreen() {
     [registrations],
   );
 
+  const completedMissionIds = useMemo(
+    () =>
+      new Set(
+        registrations
+          .filter((registration) => registration.status === "COMPLETED")
+          .map((registration) => registration.mission_id),
+      ),
+    [registrations],
+  );
+
   const filteredMissions = useMemo(() => {
-    const nextMissions = [...missions];
+    let nextMissions = missions.filter((m) => !completedMissionIds.has(m.id));
 
     if (activeFilter === "Mayor puntuacion") {
       return nextMissions.sort((a, b) => b.points_reward - a.points_reward);

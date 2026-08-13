@@ -45,6 +45,7 @@ function RootNavigator() {
     const isPointHistoryRoute = routeGroup === "point-history";
     const isRankingRoute = routeGroup === "ranking";
     const isBadgesRoute = routeGroup === "badges";
+    const isPrivacyRoute = routeGroup === "privacy";
 
     if (!isAuthenticated) {
       if (!isAuthRoute) {
@@ -62,7 +63,8 @@ function RootNavigator() {
       !isChangePasswordRoute &&
       !isPointHistoryRoute &&
       !isRankingRoute &&
-      !isBadgesRoute
+      !isBadgesRoute &&
+      !isPrivacyRoute
     ) {
       router.replace("/");
       return;
@@ -71,7 +73,8 @@ function RootNavigator() {
     if (
       (role === "AGENT" || role === "ADMIN") &&
       !isAgentRoute &&
-      !isChangePasswordRoute
+      !isChangePasswordRoute &&
+      !isPrivacyRoute
     ) {
       router.replace("/validar");
     }
@@ -161,6 +164,16 @@ function RootNavigator() {
       />
       <Stack.Screen
         name="mission/[id]"
+        options={{
+          headerShown: true,
+          headerTitle: () => <AppTopBarTitle />,
+          headerTitleAlign: "center",
+          headerLeft: () => <MissionBackButton />,
+          headerShadowVisible: true,
+        }}
+      />
+      <Stack.Screen
+        name="privacy"
         options={{
           headerShown: true,
           headerTitle: () => <AppTopBarTitle />,

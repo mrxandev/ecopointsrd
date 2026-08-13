@@ -18,7 +18,7 @@ import {
   getMissionImage,
   getMissionLocation,
 } from "@/screens/missions/mission-ui";
-import { getPublishedMissions, type Mission } from "@/services/mission-service";
+import { getMyMissionRegistrations, getPublishedMissions, type Mission } from "@/services/mission-service";
 import { getMyProfile, type UserProfile } from "@/services/user-service";
 import { getLevelProgress } from "@/utils/level";
 
@@ -51,12 +51,20 @@ export function HomeScreen() {
 
       try {
         setError(null);
-        const [nextProfile, nextMissions] = await Promise.all([
+        const [nextProfile, rawMissions, nextRegistrations] = await Promise.all([
           token ? getMyProfile(token) : Promise.resolve(null),
           getPublishedMissions(token),
+          token ? getMyMissionRegistrations(token) : Promise.resolve([]),
         ]);
+        
+        const completedIds = new Set(
+          nextRegistrations
+            .filter((r) => r.status === "COMPLETED")
+            .map((r) => r.mission_id)
+        );
+
         setProfile(nextProfile);
-        setMissions(nextMissions);
+        setMissions(rawMissions.filter((m) => !completedIds.has(m.id)));
       } catch (loadError) {
         setError(
           loadError instanceof Error
@@ -93,18 +101,7 @@ export function HomeScreen() {
     [missions],
   );
 
-  const upcomingMissions = useMemo(
-    () =>
-      [...missions]
-        .filter((mission) => Boolean(mission.start_date))
-        .sort(
-          (a, b) =>
-            new Date(a.start_date ?? 0).getTime() -
-            new Date(b.start_date ?? 0).getTime(),
-        )
-        .slice(0, 3),
-    [missions],
-  );
+
 
   return (
     <ScrollView
@@ -127,7 +124,7 @@ export function HomeScreen() {
             fontWeight: "900",
           }}
         >
-          Buenos dias, {getGreetingName(profile, user?.email)} 👋
+          Saludos, {getGreetingName(profile, user?.email)} 👋
         </Text>
         <Text
           selectable
@@ -259,28 +256,7 @@ export function HomeScreen() {
             )}
           </View>
 
-          <View style={{ gap: 10 }}>
-            <Text
-              selectable
-              style={{
-                color: isDark ? "#f3fbf6" : "#17231f",
-                fontSize: 18,
-                fontWeight: "900",
-              }}
-            >
-              Proximas Actividades
-            </Text>
 
-            {upcomingMissions.length > 0 ? (
-              <View style={{ gap: 10 }}>
-                {upcomingMissions.map((mission) => (
-                  <UpcomingMissionRow key={mission.id} mission={mission} />
-                ))}
-              </View>
-            ) : (
-              <EmptyStateCard message="No hay actividades programadas por ahora." />
-            )}
-          </View>
         </>
       ) : null}
     </ScrollView>
@@ -610,92 +586,7 @@ function RecommendedMissionCard({ mission }: { mission: Mission }) {
   );
 }
 
-function UpcomingMissionRow({ mission }: { mission: Mission }) {
-  const colorScheme = useColorScheme();
-  const isDark = (colorScheme as string) === "dark";
-  const date = mission.start_date ? new Date(mission.start_date) : null;
 
-  return (
-    <Link
-      href={{ pathname: "/mission/[id]", params: { id: mission.id } }}
-      asChild
-    >
-      <Pressable
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 12,
-          borderRadius: 10,
-          borderWidth: 1,
-          borderColor: isDark ? "#314139" : "#dbe4df",
-          backgroundColor: isDark ? "#17231f" : "#ffffff",
-          padding: 12,
-        }}
-      >
-        <View
-          style={{
-            width: 48,
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 8,
-            backgroundColor: isDark ? "#1b2823" : "#eef4f0",
-            paddingVertical: 8,
-          }}
-        >
-          <Text
-            style={{
-              color: isDark ? "#dce8e1" : "#34483e",
-              fontSize: 10,
-              fontWeight: "800",
-            }}
-          >
-            {date
-              ? new Intl.DateTimeFormat("es-DO", { month: "short" })
-                  .format(date)
-                  .toUpperCase()
-              : "---"}
-          </Text>
-          <Text
-            style={{
-              color: isDark ? "#f3fbf6" : "#17231f",
-              fontSize: 16,
-              fontWeight: "900",
-            }}
-          >
-            {date ? date.getDate() : "-"}
-          </Text>
-        </View>
-
-        <View style={{ flex: 1, gap: 2 }}>
-          <Text
-            selectable
-            numberOfLines={1}
-            style={{
-              color: isDark ? "#f3fbf6" : "#17231f",
-              fontSize: 14,
-              fontWeight: "800",
-            }}
-          >
-            {mission.title}
-          </Text>
-          <Text
-            selectable
-            style={{ color: isDark ? "#b8c7bf" : "#62776c", fontSize: 12 }}
-          >
-            {formatMissionDate(mission.start_date)}
-            {typeof mission.registered_count === "number"
-              ? ` · ${mission.registered_count} inscritos`
-              : ""}
-          </Text>
-        </View>
-
-        <Text style={{ color: isDark ? "#9fb0a7" : "#63786e", fontSize: 16 }}>
-          ›
-        </Text>
-      </Pressable>
-    </Link>
-  );
-}
 
 function EmptyStateCard({ message }: { message: string }) {
   const colorScheme = useColorScheme();

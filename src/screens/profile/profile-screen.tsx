@@ -539,7 +539,9 @@ export function ProfileScreen() {
             <Link href="/ranking" asChild>
               <MenuRow label="Ranking nacional" icon="ranking" />
             </Link>
-            <MenuRow label="Privacidad" icon="privacy" />
+            <Link href="/privacy" asChild>
+              <MenuRow label="Privacidad" icon="privacy" />
+            </Link>
             <MenuRow
               label="Cerrar sesion"
               icon="logout"
