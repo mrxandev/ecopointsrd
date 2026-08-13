@@ -1,4 +1,4 @@
-const API_ENV = process.env.EXPO_PUBLIC_API_ENV ?? "local";
+const API_ENV = process.env.EXPO_PUBLIC_API_ENV ?? "production";
 
 const LOCAL_URL =
   process.env.EXPO_PUBLIC_API_LOCAL_URL ?? "http://localhost:3000/";
@@ -11,7 +11,7 @@ function normalizeBaseUrl(url: string) {
 }
 
 export const API_BASE_URL = normalizeBaseUrl(
-  API_ENV === "production" ? PRODUCTION_URL : LOCAL_URL,
+  API_ENV === "local" ? LOCAL_URL : PRODUCTION_URL,
 );
 
 export const API_LOGIN_PATH =
