@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -16,6 +17,7 @@ import {
   formatMissionDate,
   getMissionImage,
   getMissionLocation,
+  getMissionRequirements,
 } from "@/screens/missions/mission-ui";
 import {
   getMissionById,
@@ -23,6 +25,22 @@ import {
   type Mission,
   unregisterMission,
 } from "@/services/mission-service";
+
+const palette = {
+  background: "#f9f9ff",
+  surface: "#ffffff",
+  surfaceLow: "#f1f3ff",
+  text: "#141b2b",
+  textMuted: "#404943",
+  outline: "#d1d5db",
+  primary: "#2d6a4f",
+  primaryDark: "#0f5238",
+  primarySoft: "#d8f3dc",
+  tertiary: "#0f4883",
+  tertiarySoft: "#d4e3ff",
+  error: "#ba1a1a",
+  errorSoft: "#ffdad6",
+};
 
 export function MissionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -165,162 +183,258 @@ export function MissionDetailScreen() {
     );
   }
 
+  const availableSlots =
+    mission.max_participants && typeof mission.registered_count === "number"
+      ? Math.max(mission.max_participants - mission.registered_count, 0)
+      : null;
+  const participantProgress =
+    mission.max_participants && typeof mission.registered_count === "number"
+      ? Math.min(Math.max(mission.registered_count / mission.max_participants, 0), 1)
+      : 0;
+  const requirements = getMissionRequirements(mission);
+
   return (
-    <View style={{ flex: 1, backgroundColor: isDark ? "#f9f9ff" : "#f9f9ff" }}>
+    <View style={{ flex: 1, backgroundColor: palette.background }}>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 118 }}
       >
-        <Image
-          source={getMissionImage(mission.id)}
-          contentFit="cover"
-          transition={180}
-          style={{ height: 230, width: "100%" }}
-        />
-
-        <View style={{ padding: 18, gap: 16 }}>
-          <View style={{ gap: 10 }}>
-            <View
-              style={{
-                alignSelf: "flex-start",
-                borderRadius: 999,
-                backgroundColor: "#dff8e8",
-                paddingHorizontal: 10,
-                paddingVertical: 5,
-              }}
-            >
-              <Text style={{ color: "#166534", fontSize: 12, fontWeight: "900" }}>
-                {mission.mission_type}
-              </Text>
-            </View>
-            <Text
-              selectable
-              style={{
-                color: isDark ? "#f3fbf6" : "#141b2b",
-                fontSize: 25,
-                fontWeight: "900",
-                lineHeight: 30,
-              }}
-            >
-              {mission.title}
-            </Text>
-          </View>
-
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-            <InfoPill value={formatMissionDate(mission.start_date)} />
-            <InfoPill value={getMissionLocation(mission)} />
-          </View>
-
+        <View>
+          <Image
+            source={getMissionImage(mission.id)}
+            contentFit="cover"
+            transition={180}
+            style={{ height: 220, width: "100%" }}
+          />
           <View
             style={{
-              borderRadius: 8,
-              backgroundColor: isDark ? "#123325" : "#d8f3dc",
-              padding: 16,
-              gap: 4,
+              position: "absolute",
+              left: 16,
+              bottom: 14,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 6,
+              borderRadius: 999,
+              backgroundColor: "rgba(20, 27, 43, 0.55)",
+              paddingHorizontal: 12,
+              paddingVertical: 6,
             }}
           >
-            <Text selectable style={{ color: isDark ? "#b9f2c7" : "#2d6a4f", fontSize: 12 }}>
-              Recompensa confirmada
-            </Text>
-            <Text
-              selectable
-              style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 18, fontWeight: "900" }}
-            >
-              Ganaras {mission.points_reward} pts por participar
+            <Ionicons name="leaf-outline" size={13} color="#d8f3dc" />
+            <Text style={{ color: "#ffffff", fontSize: 12, fontWeight: "900" }}>
+              {mission.mission_type}
             </Text>
           </View>
+        </View>
 
-          {isRegistered ? (
+        <View style={{ padding: 18, gap: 16 }}>
+          <Text
+            selectable
+            style={{
+              color: palette.text,
+              fontSize: 24,
+              fontWeight: "900",
+              lineHeight: 29,
+            }}
+          >
+            {mission.title}
+          </Text>
+
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+            <InfoPill icon="calendar-outline" value={formatMissionDate(mission.start_date)} />
+            <InfoPill icon="location-outline" value={getMissionLocation(mission)} />
+            <InfoPill
+              icon="people-outline"
+              value={
+                mission.max_participants && typeof mission.registered_count === "number"
+                  ? `${mission.registered_count} de ${mission.max_participants}`
+                  : "Cupos abiertos"
+              }
+            />
+          </View>
+
+          {mission.max_participants && typeof mission.registered_count === "number" ? (
             <View
               style={{
                 borderRadius: 8,
                 borderWidth: 1,
-                borderColor: isDark ? "#314139" : "#d1d5db",
-                backgroundColor: isDark ? "#ffffff" : "#ffffff",
-                padding: 16,
-                gap: 4,
+                borderColor: palette.outline,
+                backgroundColor: palette.surface,
+                padding: 14,
+                gap: 8,
               }}
             >
-              <Text selectable style={{ color: isDark ? "#9fb0a7" : "#404943", fontSize: 12 }}>
-                Estado de tu participacion
-              </Text>
-              <Text
-                selectable
-                style={{
-                  color: isDark ? "#f3fbf6" : "#141b2b",
-                  fontSize: 16,
-                  fontWeight: "900",
-                }}
-              >
-                {mission.my_registration_status === "COMPLETED"
-                  ? "Completada"
-                  : "Inscrito"}
-              </Text>
+              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                <Text style={{ color: palette.text, fontSize: 12, fontWeight: "800" }}>
+                  Participantes inscritos
+                </Text>
+                <Text style={{ color: palette.textMuted, fontSize: 12, fontWeight: "700" }}>
+                  {availableSlots} cupos disponibles
+                </Text>
+              </View>
+              <ProgressBar progress={participantProgress} />
             </View>
           ) : null}
 
           <View
             style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
               borderRadius: 8,
-              borderWidth: 1,
-              borderColor: isDark ? "#314139" : "#d1d5db",
-              backgroundColor: isDark ? "#ffffff" : "#ffffff",
+              backgroundColor: palette.primarySoft,
               padding: 16,
-              gap: 4,
             }}
           >
-            <Text selectable style={{ color: isDark ? "#9fb0a7" : "#404943", fontSize: 12 }}>
-              Organizado por
-            </Text>
-            <Text
-              selectable
-              style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 16, fontWeight: "900" }}
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 999,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#ffffff",
+              }}
             >
-              {mission.organization_name ?? "Organizacion EcoPoints"}
-            </Text>
+              <Ionicons name="trophy-outline" size={20} color={palette.primaryDark} />
+            </View>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text selectable style={{ color: palette.primary, fontSize: 12 }}>
+                Recompensa confirmada
+              </Text>
+              <Text
+                selectable
+                style={{ color: palette.text, fontSize: 17, fontWeight: "900" }}
+              >
+                Ganaras {mission.points_reward} pts por participar
+              </Text>
+            </View>
+          </View>
+
+          {isRegistered ? (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 12,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: palette.outline,
+                backgroundColor: palette.surface,
+                padding: 16,
+              }}
+            >
+              <Ionicons
+                name={mission.my_registration_status === "COMPLETED" ? "checkmark-circle" : "time-outline"}
+                size={22}
+                color={palette.primaryDark}
+              />
+              <View style={{ gap: 2 }}>
+                <Text selectable style={{ color: palette.textMuted, fontSize: 12 }}>
+                  Estado de tu participacion
+                </Text>
+                <Text
+                  selectable
+                  style={{
+                    color: palette.text,
+                    fontSize: 16,
+                    fontWeight: "900",
+                  }}
+                >
+                  {mission.my_registration_status === "COMPLETED"
+                    ? "Completada"
+                    : "Inscrito"}
+                </Text>
+              </View>
+            </View>
+          ) : null}
+
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: palette.outline,
+              backgroundColor: palette.surface,
+              padding: 16,
+            }}
+          >
+            <Ionicons name="business-outline" size={22} color={palette.primaryDark} />
+            <View style={{ gap: 2 }}>
+              <Text selectable style={{ color: palette.textMuted, fontSize: 12 }}>
+                Organizado por
+              </Text>
+              <Text
+                selectable
+                style={{ color: palette.text, fontSize: 16, fontWeight: "900" }}
+              >
+                {mission.organization_name ?? "Organizacion EcoPoints"}
+              </Text>
+            </View>
           </View>
 
           <View style={{ gap: 8 }}>
             <Text
               selectable
-              style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 18, fontWeight: "900" }}
+              style={{ color: palette.text, fontSize: 16, fontWeight: "900" }}
+            >
+              Requisitos
+            </Text>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+              {requirements.map((requirement) => (
+                <View
+                  key={requirement}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 6,
+                    borderRadius: 999,
+                    borderWidth: 1,
+                    borderColor: palette.outline,
+                    backgroundColor: palette.surfaceLow,
+                    paddingHorizontal: 10,
+                    paddingVertical: 6,
+                  }}
+                >
+                  <Ionicons name="checkmark-circle-outline" size={14} color={palette.primaryDark} />
+                  <Text style={{ color: palette.text, fontSize: 12, fontWeight: "700" }}>
+                    {requirement}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          <View style={{ gap: 8 }}>
+            <Text
+              selectable
+              style={{ color: palette.text, fontSize: 18, fontWeight: "900" }}
             >
               Descripcion
             </Text>
             <Text
               selectable
-              style={{ color: isDark ? "#c9d6cf" : "#374c42", fontSize: 14, lineHeight: 20 }}
+              style={{ color: "#374c42", fontSize: 14, lineHeight: 20 }}
             >
               {mission.description}
             </Text>
           </View>
 
-
           {actionMessage ? (
             <View
               style={{
                 borderRadius: 8,
-                backgroundColor: isRegistered
-                  ? isDark
-                    ? "#123325"
-                    : "#d8f3dc"
-                  : isDark
-                    ? "#351d1b"
-                    : "#ffdad6",
+                backgroundColor: isRegistered ? palette.primarySoft : palette.errorSoft,
                 padding: 14,
               }}
             >
               <Text
                 selectable
                 style={{
-                  color: isRegistered
-                    ? isDark
-                      ? "#b9f2c7"
-                      : "#166534"
-                    : isDark
-                      ? "#ffd9d6"
-                      : "#93000a",
+                  color: isRegistered ? "#166534" : "#93000a",
                   fontSize: 13,
                   fontWeight: "800",
                 }}
@@ -339,9 +453,9 @@ export function MissionDetailScreen() {
           right: 0,
           bottom: 0,
           padding: 14,
-          backgroundColor: isDark ? "#f9f9ff" : "#f9f9ff",
+          backgroundColor: palette.background,
           borderTopWidth: 1,
-          borderTopColor: isDark ? "#26332f" : "#d1d5db",
+          borderTopColor: palette.outline,
           gap: 10,
         }}
       >
@@ -417,24 +531,44 @@ export function MissionDetailScreen() {
   );
 }
 
-function InfoPill({ value }: { value: string }) {
-  const isDark = false;
-
+function InfoPill({
+  icon,
+  value,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  value: string;
+}) {
   return (
     <View
       style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
         borderRadius: 999,
-        backgroundColor: isDark ? "#1b2823" : "#f1f3ff",
+        backgroundColor: palette.surfaceLow,
         paddingHorizontal: 10,
         paddingVertical: 6,
       }}
     >
-      <Text
-        selectable
-        style={{ color: isDark ? "#dce8e1" : "#404943", fontSize: 12, fontWeight: "700" }}
-      >
+      <Ionicons name={icon} size={13} color={palette.textMuted} />
+      <Text selectable style={{ color: palette.textMuted, fontSize: 12, fontWeight: "700" }}>
         {value}
       </Text>
+    </View>
+  );
+}
+
+function ProgressBar({ progress }: { progress: number }) {
+  return (
+    <View style={{ height: 6, borderRadius: 999, backgroundColor: "#e9edff", overflow: "hidden" }}>
+      <View
+        style={{
+          height: "100%",
+          width: `${Math.round(progress * 100)}%`,
+          borderRadius: 999,
+          backgroundColor: "#52b788",
+        }}
+      />
     </View>
   );
 }

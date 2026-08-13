@@ -1,8 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { useMemo, useState } from "react";
 import {
     ActivityIndicator,
+    KeyboardAvoidingView,
     Modal,
+    Platform,
     Pressable,
     ScrollView,
     Text,
@@ -80,6 +83,38 @@ export function EditProfileModal({
   onSave,
   onChange,
 }: EditProfileModalProps) {
+  const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
+
+  const errors = useMemo(() => {
+    const nextErrors: Partial<Record<keyof EditProfileForm, string>> = {};
+
+    if (!form.first_name.trim()) {
+      nextErrors.first_name = "El nombre es obligatorio.";
+    }
+
+    if (!form.last_name.trim()) {
+      nextErrors.last_name = "El apellido es obligatorio.";
+    }
+
+    if (form.phone && form.phone.replace(/\D/g, "").length > 0 && form.phone.replace(/\D/g, "").length < 10) {
+      nextErrors.phone = "Ingresa un numero de telefono completo.";
+    }
+
+    return nextErrors;
+  }, [form.first_name, form.last_name, form.phone]);
+
+  const hasErrors = Object.keys(errors).length > 0;
+
+  function handleSavePress() {
+    setHasAttemptedSave(true);
+
+    if (hasErrors) {
+      return;
+    }
+
+    void onSave();
+  }
+
   return (
     <Modal
       visible={visible}
@@ -87,6 +122,11 @@ export function EditProfileModal({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : undefined}
+      >
       <View style={{ flex: 1, backgroundColor: palette.background }}>
         {/* Header */}
         <View
@@ -130,6 +170,7 @@ export function EditProfileModal({
             gap: 16,
             paddingBottom: 20,
           }}
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           {/* Profile Image Preview - Compact */}
@@ -275,6 +316,7 @@ export function EditProfileModal({
               onChangeText={(value) => onChange("first_name", value)}
               placeholder="Tu nombre"
               icon="person-outline"
+              error={hasAttemptedSave ? errors.first_name : undefined}
             />
 
             <FormField
@@ -283,6 +325,7 @@ export function EditProfileModal({
               onChangeText={(value) => onChange("last_name", value)}
               placeholder="Tu apellido"
               icon="person-outline"
+              error={hasAttemptedSave ? errors.last_name : undefined}
             />
 
             <FormField
@@ -295,6 +338,7 @@ export function EditProfileModal({
               icon="call-outline"
               keyboardType="phone-pad"
               maxLength={12}
+              error={hasAttemptedSave ? errors.phone : undefined}
             />
 
             <ProvinceSelect
@@ -365,17 +409,18 @@ export function EditProfileModal({
           </Pressable>
 
           <Pressable
-            onPress={onSave}
-            disabled={isSaving}
+            onPress={handleSavePress}
+            disabled={isSaving || (hasAttemptedSave && hasErrors)}
             style={({ pressed }) => ({
               flex: 1,
               minHeight: 48,
               alignItems: "center",
               justifyContent: "center",
               borderRadius: 10,
-              backgroundColor: isSaving
-                ? palette.surfaceVariant
-                : palette.primary,
+              backgroundColor:
+                isSaving || (hasAttemptedSave && hasErrors)
+                  ? palette.surfaceVariant
+                  : palette.primary,
               opacity: pressed && !isSaving ? 0.9 : 1,
             })}
           >
@@ -395,6 +440,7 @@ export function EditProfileModal({
           </Pressable>
         </View>
       </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -408,6 +454,7 @@ interface FormFieldProps {
   keyboardType?: "default" | "phone-pad" | "number-pad" | "email-address";
   multiline?: boolean;
   maxLength?: number;
+  error?: string;
 }
 
 function FormField({
@@ -419,6 +466,7 @@ function FormField({
   keyboardType = "default",
   multiline = false,
   maxLength,
+  error,
 }: FormFieldProps) {
   return (
     <View style={{ gap: 6 }}>
@@ -449,7 +497,7 @@ function FormField({
         style={{
           borderRadius: 10,
           borderWidth: 1.5,
-          borderColor: palette.surfaceVariant,
+          borderColor: error ? palette.error : palette.surfaceVariant,
           backgroundColor: palette.surface,
           paddingHorizontal: 14,
           paddingVertical: 2,
@@ -478,6 +526,11 @@ function FormField({
           }}
         />
       </View>
+      {error ? (
+        <Text style={{ color: palette.error, fontSize: 11, fontWeight: "700", paddingHorizontal: 4 }}>
+          {error}
+        </Text>
+      ) : null}
     </View>
   );
 }

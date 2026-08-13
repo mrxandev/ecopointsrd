@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
     ActivityIndicator,
     Pressable,
@@ -12,6 +12,7 @@ import {
 } from "react-native";
 
 import { BadgeDetailModal } from "@/components/ui/badge-detail-modal";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { EditProfileModal } from "@/components/ui/edit-profile-modal";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -81,6 +82,8 @@ export function ProfileScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const initialFormRef = useRef<EditableProfile | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [nationalRank, setNationalRank] = useState<number | null>(null);
@@ -248,6 +251,36 @@ export function ProfileScreen() {
     } finally {
       setIsSaving(false);
     }
+  }
+
+  function handleOpenEdit() {
+    initialFormRef.current = form;
+    setIsEditing(true);
+  }
+
+  function handleRequestCloseEdit() {
+    const initialForm = initialFormRef.current;
+    const isDirty =
+      !!initialForm &&
+      (Object.keys(initialForm) as (keyof EditableProfile)[]).some(
+        (field) => initialForm[field] !== form[field],
+      );
+
+    if (isDirty) {
+      setShowDiscardConfirm(true);
+      return;
+    }
+
+    setIsEditing(false);
+  }
+
+  function handleDiscardChanges() {
+    if (initialFormRef.current) {
+      setForm(initialFormRef.current);
+    }
+
+    setShowDiscardConfirm(false);
+    setIsEditing(false);
   }
 
   return (
@@ -500,13 +533,23 @@ export function ProfileScreen() {
               profile={activeProfile}
               form={form}
               isSaving={isSaving}
-              onClose={() => setIsEditing(false)}
+              onClose={handleRequestCloseEdit}
               onChange={(field, value) =>
                 setForm((current) => ({ ...current, [field]: value }))
               }
               onSave={handleSave}
             />
           ) : null}
+
+          <ConfirmationDialog
+            confirmLabel="Descartar"
+            danger
+            message="Tienes cambios sin guardar en tu perfil. Si sales ahora se perderan."
+            onCancel={() => setShowDiscardConfirm(false)}
+            onConfirm={handleDiscardChanges}
+            title="Descartar cambios"
+            visible={showDiscardConfirm}
+          />
 
           {message ? (
             <InlineMessage
@@ -528,7 +571,7 @@ export function ProfileScreen() {
             <MenuRow
               label="Editar perfil"
               icon="edit"
-              onPress={() => setIsEditing((value) => !value)}
+              onPress={handleOpenEdit}
             />
             <Link href="/recompensas" asChild>
               <MenuRow label="Recompensas" icon="rewards" />

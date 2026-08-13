@@ -47,6 +47,7 @@ export type RankingUser = {
   completed_missions?: number;
   rank: number;
   previous_rank?: number | null;
+  role?: string | null;
 };
 
 type ProfileResponse = {
@@ -220,7 +221,11 @@ function normalizeRankingPayload(data: RankingResponse | null) {
       payload?.top_users ??
       [];
 
-  const users = ranking.map(normalizeRankingUser).sort((a, b) => a.rank - b.rank);
+  const users = ranking
+    .filter((rankingUser) => !rankingUser.role || rankingUser.role.toUpperCase() === "USER")
+    .map(normalizeRankingUser)
+    .sort((a, b) => a.rank - b.rank)
+    .map((rankingUser, index) => ({ ...rankingUser, rank: index + 1 }));
   const currentUserRank = Array.isArray(payload)
     ? null
     : payload?.current_user_rank ??

@@ -13,11 +13,15 @@ import {
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { useAuth } from "@/hooks/use-auth";
 import {
+  getMyRedemptions,
   getRewards,
   redeemReward,
   type Reward,
+  type RewardRedemption,
 } from "@/services/reward-service";
 import { getMyPoints } from "@/services/user-service";
+
+const VIEWS = ["Catalogo", "Mis canjes"] as const;
 
 const FALLBACK_REWARD_IMAGES = [
   "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=700&q=80",
@@ -27,7 +31,9 @@ const FALLBACK_REWARD_IMAGES = [
 
 export function RewardsScreen() {
   const { token } = useAuth();
+  const [view, setView] = useState<(typeof VIEWS)[number]>("Catalogo");
   const [rewards, setRewards] = useState<Reward[]>([]);
+  const [redemptions, setRedemptions] = useState<RewardRedemption[]>([]);
   const [points, setPoints] = useState(0);
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -48,12 +54,14 @@ export function RewardsScreen() {
       try {
         setError(null);
         setMessage(null);
-        const [nextRewards, nextPoints] = await Promise.all([
+        const [nextRewards, nextPoints, nextRedemptions] = await Promise.all([
           getRewards(),
           token ? getMyPoints(token) : Promise.resolve({ points: 0 }),
+          token ? getMyRedemptions(token).catch(() => []) : Promise.resolve([]),
         ]);
         setRewards(nextRewards);
         setPoints(nextPoints.points ?? 0);
+        setRedemptions(nextRedemptions);
       } catch (rewardError) {
         setError(
           rewardError instanceof Error ? rewardError.message : "No pudimos cargar recompensas.",
@@ -161,28 +169,63 @@ export function RewardsScreen() {
         <Text selectable style={{ color: "#0b5f46", fontSize: 25, fontWeight: "900" }}>
           Recompensas
         </Text>
-        <View
-          style={{
-            minHeight: 46,
-            alignItems: "center",
-            borderRadius: 8,
-            backgroundColor: "#ffffff",
-            borderWidth: 1,
-            borderColor: "#9aa8a0",
-            flexDirection: "row",
-            paddingHorizontal: 12,
-          }}
-        >
-          <SearchIcon />
-          <TextInput
-            autoCapitalize="words"
-            onChangeText={setQuery}
-            placeholder="Buscar recompensas..."
-            placeholderTextColor="#9ca6a0"
-            style={{ color: "#141b2b", flex: 1, fontSize: 13, minHeight: 44, marginLeft: 8 }}
-            value={query}
-          />
+
+        <View style={{ borderBottomWidth: 1, borderBottomColor: "#d1d5db", flexDirection: "row" }}>
+          {VIEWS.map((item) => {
+            const isActive = item === view;
+
+            return (
+              <Pressable
+                accessibilityRole="button"
+                key={item}
+                onPress={() => setView(item)}
+                style={{
+                  flex: 1,
+                  minHeight: 34,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderBottomWidth: 2,
+                  borderBottomColor: isActive ? "#0f5238" : "transparent",
+                }}
+              >
+                <Text
+                  style={{
+                    color: isActive ? "#0f5238" : "#404943",
+                    fontSize: 12,
+                    fontWeight: "800",
+                  }}
+                >
+                  {item === "Catalogo" ? "Catalogo" : "Mis canjes"}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
+
+        {view === "Catalogo" ? (
+          <View
+            style={{
+              minHeight: 46,
+              alignItems: "center",
+              borderRadius: 8,
+              backgroundColor: "#ffffff",
+              borderWidth: 1,
+              borderColor: "#9aa8a0",
+              flexDirection: "row",
+              paddingHorizontal: 12,
+            }}
+          >
+            <SearchIcon />
+            <TextInput
+              autoCapitalize="words"
+              onChangeText={setQuery}
+              placeholder="Buscar recompensas..."
+              placeholderTextColor="#9ca6a0"
+              style={{ color: "#141b2b", flex: 1, fontSize: 13, minHeight: 44, marginLeft: 8 }}
+              value={query}
+            />
+          </View>
+        ) : null}
       </View>
 
       {isLoading ? (
@@ -203,7 +246,36 @@ export function RewardsScreen() {
         />
       ) : null}
 
-      {!isLoading && !error && popularRewards.length > 0 ? (
+      {!isLoading && !error && view === "Mis canjes" ? (
+        <View style={{ gap: 10 }}>
+          {redemptions.length > 0 ? (
+            redemptions.map((redemption) => (
+              <RedemptionRow key={redemption.id} redemption={redemption} />
+            ))
+          ) : (
+            <View
+              style={{
+                minHeight: 190,
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 8,
+                backgroundColor: "#ffffff",
+                padding: 20,
+                gap: 6,
+              }}
+            >
+              <Text selectable style={{ color: "#141b2b", fontWeight: "900", textAlign: "center" }}>
+                Aun no has canjeado recompensas.
+              </Text>
+              <Text selectable style={{ color: "#607068", fontSize: 12, textAlign: "center" }}>
+                Explora el catalogo y canjea tus puntos por premios.
+              </Text>
+            </View>
+          )}
+        </View>
+      ) : null}
+
+      {!isLoading && !error && view === "Catalogo" && popularRewards.length > 0 ? (
         <View style={{ gap: 9 }}>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
             <Text selectable style={{ color: "#141b2b", fontSize: 15, fontWeight: "900" }}>
@@ -230,7 +302,7 @@ export function RewardsScreen() {
         </View>
       ) : null}
 
-      {!isLoading && !error ? (
+      {!isLoading && !error && view === "Catalogo" ? (
         <View style={{ gap: 10 }}>
           <Text selectable style={{ color: "#141b2b", fontSize: 15, fontWeight: "900" }}>
             Todas las opciones
@@ -248,7 +320,7 @@ export function RewardsScreen() {
         </View>
       ) : null}
 
-      {!isLoading && !error && filteredRewards.length === 0 ? (
+      {!isLoading && !error && view === "Catalogo" && filteredRewards.length === 0 ? (
         <View
           style={{
             minHeight: 190,
@@ -542,6 +614,89 @@ function SearchIcon() {
       />
     </View>
   );
+}
+
+function RedemptionRow({ redemption }: { redemption: RewardRedemption }) {
+  const isFulfilled = redemption.status?.toUpperCase() === "FULFILLED" || redemption.status?.toUpperCase() === "COMPLETED";
+  const isPending = redemption.status?.toUpperCase() === "PENDING";
+
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#e0e7e3",
+        backgroundColor: "#ffffff",
+        boxShadow: "0 2px 8px rgba(20, 27, 43, 0.07)",
+        padding: 12,
+      }}
+    >
+      <Image
+        source={redemption.image_url || FALLBACK_REWARD_IMAGES[0]}
+        contentFit="cover"
+        style={{ width: 52, height: 52, borderRadius: 8, backgroundColor: "#e6ece8" }}
+      />
+      <View style={{ flex: 1, gap: 4 }}>
+        <Text selectable numberOfLines={2} style={{ color: "#141b2b", fontSize: 13, fontWeight: "900" }}>
+          {redemption.title}
+        </Text>
+        <Text selectable style={{ color: "#607068", fontSize: 11 }}>
+          {formatRedemptionDate(redemption.created_at)}
+        </Text>
+      </View>
+      <View style={{ alignItems: "flex-end", gap: 6 }}>
+        <Text style={{ color: "#93000a", fontSize: 12, fontWeight: "900" }}>
+          -{new Intl.NumberFormat("es-DO").format(redemption.points_spent)} pts
+        </Text>
+        <View
+          style={{
+            borderRadius: 999,
+            paddingHorizontal: 8,
+            paddingVertical: 3,
+            backgroundColor: isFulfilled ? "#d8f3dc" : isPending ? "#fef3c7" : "#e0f2fe",
+          }}
+        >
+          <Text
+            style={{
+              color: isFulfilled ? "#166534" : isPending ? "#92400e" : "#075985",
+              fontSize: 10,
+              fontWeight: "900",
+            }}
+          >
+            {formatRedemptionStatus(redemption.status)}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function formatRedemptionDate(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Fecha no disponible";
+  }
+
+  return new Intl.DateTimeFormat("es-DO", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
+
+function formatRedemptionStatus(status: string) {
+  const labels: Record<string, string> = {
+    COMPLETED: "Completado",
+    FULFILLED: "Entregado",
+    PENDING: "Pendiente",
+    CANCELLED: "Cancelado",
+  };
+
+  return labels[status?.toUpperCase()] ?? status ?? "Pendiente";
 }
 
 function MessageCard({ danger, message }: { danger?: boolean; message: string }) {
