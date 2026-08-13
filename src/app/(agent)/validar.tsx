@@ -215,7 +215,7 @@ export default function ValidateScreen() {
         selectedMission.id,
         {
           user_id: pendingScanData.user_id,
-          ...(pendingScanData.qr_token ? { qr_token: pendingScanData.qr_token } : {}),
+          ...(pendingScanData.qr_token ? { qr_token: pendingScanData.qr_token } : { is_manual: true }),
           ...(notesInput.trim() ? { notes: notesInput.trim() } : {}),
         },
         token,

@@ -249,6 +249,7 @@ export type MissionValidationPayload = {
   user_id: string;
   qr_token?: string;
   notes?: string;
+  is_manual?: boolean;
 };
 
 export async function validateMissionParticipation(
