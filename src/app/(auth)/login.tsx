@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { useState } from "react";
 import {
@@ -26,7 +27,7 @@ export default function LoginScreen() {
     const cleanEmail = email.trim();
 
     if (!cleanEmail || !password) {
-      setError("Completa tu correo y contrasena para continuar.");
+      setError("Completa tu correo y contraseña para continuar.");
       return;
     }
 
@@ -138,7 +139,7 @@ export default function LoginScreen() {
             selectable
             style={{ color: isDark ? "#e5e9e7" : "#34483e", fontSize: 13, fontWeight: "700" }}
           >
-            Contrasena
+            Contraseña
           </Text>
           <View style={{ justifyContent: "center" }}>
             <TextInput
@@ -163,20 +164,19 @@ export default function LoginScreen() {
               value={password}
             />
             <Pressable
+              accessibilityLabel={isPasswordVisible ? "Ocultar contraseña" : "Mostrar contraseña"}
               accessibilityRole="button"
               hitSlop={8}
               onPress={() => setIsPasswordVisible((visible) => !visible)}
               style={{ position: "absolute", right: 14 }}
             >
-              <Text style={{ fontSize: 16 }}>{isPasswordVisible ? "🙈" : "👁️"}</Text>
+              <Ionicons
+                name={isPasswordVisible ? "eye-off-outline" : "eye-outline"}
+                size={22}
+                color="#62776c"
+              />
             </Pressable>
           </View>
-
-          <Pressable accessibilityRole="button" style={{ alignSelf: "flex-end" }}>
-            <Text style={{ color: "#28734f", fontSize: 13, fontWeight: "700" }}>
-              ¿Olvidaste tu contrasena?
-            </Text>
-          </Pressable>
         </View>
       </View>
 

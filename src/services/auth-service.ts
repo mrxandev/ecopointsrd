@@ -172,5 +172,5 @@ export async function changePasswordRequest(
     throw new Error(getErrorMessage(data));
   }
 
-  return data?.message ?? "Contrasena actualizada correctamente.";
+  return data?.message ?? "Contraseña actualizada correctamente.";
 }

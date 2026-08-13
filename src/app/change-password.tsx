@@ -26,25 +26,25 @@ export default function ChangePasswordScreen() {
   async function handleSubmit() {
     if (!token) {
       setIsSuccess(false);
-      setMessage("Inicia sesion nuevamente para cambiar tu contrasena.");
+      setMessage("Inicia sesión nuevamente para cambiar tu contraseña.");
       return;
     }
 
     if (!currentPassword || !newPassword) {
       setIsSuccess(false);
-      setMessage("Completa tu contrasena actual y la nueva.");
+      setMessage("Completa tu contraseña actual y la nueva.");
       return;
     }
 
     if (newPassword.length < 8) {
       setIsSuccess(false);
-      setMessage("La nueva contrasena debe tener minimo 8 caracteres.");
+      setMessage("La nueva contraseña debe tener mínimo 8 caracteres.");
       return;
     }
 
     if (newPassword !== confirmPassword) {
       setIsSuccess(false);
-      setMessage("La confirmacion no coincide con la nueva contrasena.");
+      setMessage("La confirmación no coincide con la nueva contraseña.");
       return;
     }
 
@@ -63,7 +63,7 @@ export default function ChangePasswordScreen() {
       setMessage(
         changeError instanceof Error
           ? changeError.message
-          : "No pudimos cambiar tu contrasena.",
+          : "No pudimos cambiar tu contraseña.",
       );
     } finally {
       setIsSubmitting(false);
@@ -82,27 +82,27 @@ export default function ChangePasswordScreen() {
           selectable
           style={{ color: isDark ? "#f3fbf6" : "#141b2b", fontSize: 30, fontWeight: "900" }}
         >
-          Cambiar contrasena
+          Cambiar contraseña
         </Text>
         <Text selectable style={{ color: isDark ? "#b8c7bf" : "#404943", fontSize: 15 }}>
-          Usa una nueva contrasena de minimo 8 caracteres.
+          Usa una nueva contraseña de mínimo 8 caracteres.
         </Text>
       </View>
 
       <View style={{ gap: 12 }}>
         <PasswordInput
           onChangeText={setCurrentPassword}
-          placeholder="Contrasena actual"
+          placeholder="Contraseña actual"
           value={currentPassword}
         />
         <PasswordInput
           onChangeText={setNewPassword}
-          placeholder="Nueva contrasena"
+          placeholder="Nueva contraseña"
           value={newPassword}
         />
         <PasswordInput
           onChangeText={setConfirmPassword}
-          placeholder="Confirmar nueva contrasena"
+          placeholder="Confirmar nueva contraseña"
           value={confirmPassword}
         />
       </View>

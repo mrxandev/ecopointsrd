@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -68,22 +69,22 @@ export default function RegisterScreen() {
     const cleanLastName = lastName.trim();
 
     if (!cleanCedula || !cleanFirstName || !cleanLastName || !cleanEmail || !password) {
-      setError("Completa cedula, nombre, apellido, correo y contrasena.");
+      setError("Completa cédula, nombre, apellido, correo y contraseña.");
       return;
     }
 
     if (cleanCedula.length !== 11) {
-      setError("La cedula debe tener 11 digitos.");
+      setError("La cédula debe tener 11 dígitos.");
       return;
     }
 
     if (!EMAIL_PATTERN.test(cleanEmail)) {
-      setError("Ingresa un correo valido, por ejemplo nombre@email.com.");
+      setError("Ingresa un correo válido, por ejemplo nombre@email.com.");
       return;
     }
 
     if (password.length < 8) {
-      setError("La contrasena debe tener minimo 8 caracteres.");
+      setError("La contraseña debe tener mínimo 8 caracteres.");
       return;
     }
 
@@ -229,10 +230,10 @@ export default function RegisterScreen() {
             autoCapitalize="none"
             autoComplete="password-new"
             isPasswordVisible={isPasswordVisible}
-            label="Contrasena"
+            label="Contraseña"
             onChangeText={setPassword}
             onTogglePasswordVisibility={() => setIsPasswordVisible((value) => !value)}
-            placeholder="Minimo 8 caracteres"
+            placeholder="Mínimo 8 caracteres"
             secureTextEntry
             value={password}
           />
@@ -380,7 +381,7 @@ function AuthInput({
         />
         {secureTextEntry ? (
           <Pressable
-            accessibilityLabel={isPasswordVisible ? "Ocultar contrasena" : "Mostrar contrasena"}
+            accessibilityLabel={isPasswordVisible ? "Ocultar contraseña" : "Mostrar contraseña"}
             accessibilityRole="button"
             onPress={onTogglePasswordVisibility}
             style={{
@@ -390,7 +391,11 @@ function AuthInput({
               justifyContent: "center",
             }}
           >
-            <Text style={{ fontSize: 16 }}>{isPasswordVisible ? "🙈" : "👁️"}</Text>
+            <Ionicons
+              name={isPasswordVisible ? "eye-off-outline" : "eye-outline"}
+              size={22}
+              color="#62776c"
+            />
           </Pressable>
         ) : null}
       </View>

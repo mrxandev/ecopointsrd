@@ -13,9 +13,11 @@ import {
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { useAuth } from "@/hooks/use-auth";
 import {
+  getMyRedemptions,
   getRewards,
   redeemReward,
   type Reward,
+  type RewardRedemption,
 } from "@/services/reward-service";
 import { getMyPoints } from "@/services/user-service";
 
@@ -27,7 +29,9 @@ const FALLBACK_REWARD_IMAGES = [
 
 export function RewardsScreen() {
   const { token } = useAuth();
+  const [activeTab, setActiveTab] = useState<"catalog" | "redemptions">("catalog");
   const [rewards, setRewards] = useState<Reward[]>([]);
+  const [redemptions, setRedemptions] = useState<RewardRedemption[]>([]);
   const [points, setPoints] = useState(0);
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -48,12 +52,14 @@ export function RewardsScreen() {
       try {
         setError(null);
         setMessage(null);
-        const [nextRewards, nextPoints] = await Promise.all([
+        const [nextRewards, nextPoints, nextRedemptions] = await Promise.all([
           getRewards(),
           token ? getMyPoints(token) : Promise.resolve({ points: 0 }),
+          token ? getMyRedemptions(token) : Promise.resolve([]),
         ]);
         setRewards(nextRewards);
         setPoints(nextPoints.points ?? 0);
+        setRedemptions(nextRedemptions);
       } catch (rewardError) {
         setError(
           rewardError instanceof Error ? rewardError.message : "No pudimos cargar recompensas.",
@@ -96,6 +102,23 @@ export function RewardsScreen() {
         .includes(cleanQuery),
     );
   }, [query, sortedRewards]);
+
+  const filteredRedemptions = useMemo(() => {
+    const cleanQuery = query.trim().toLowerCase();
+    const sorted = [...redemptions].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    if (!cleanQuery) {
+      return sorted;
+    }
+
+    return sorted.filter((redemption) =>
+      [redemption.title]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(cleanQuery),
+    );
+  }, [query, redemptions]);
 
   const popularRewards = filteredRewards.slice(0, 5);
 
@@ -161,6 +184,37 @@ export function RewardsScreen() {
         <Text selectable style={{ color: "#0b5f46", fontSize: 25, fontWeight: "900" }}>
           Recompensas
         </Text>
+        <View style={{ flexDirection: "row", backgroundColor: "#e6ece8", borderRadius: 8, padding: 4 }}>
+          <Pressable
+            onPress={() => setActiveTab("catalog")}
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+              paddingVertical: 8,
+              backgroundColor: activeTab === "catalog" ? "#ffffff" : "transparent",
+              borderRadius: 6,
+              boxShadow: activeTab === "catalog" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+            }}
+          >
+            <Text style={{ color: activeTab === "catalog" ? "#0b5f46" : "#607068", fontSize: 13, fontWeight: "800" }}>Catálogo</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setActiveTab("redemptions")}
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+              paddingVertical: 8,
+              backgroundColor: activeTab === "redemptions" ? "#ffffff" : "transparent",
+              borderRadius: 6,
+              boxShadow: activeTab === "redemptions" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+            }}
+          >
+            <Text style={{ color: activeTab === "redemptions" ? "#0b5f46" : "#607068", fontSize: 13, fontWeight: "800" }}>Mis Canjes</Text>
+          </Pressable>
+        </View>
+
         <View
           style={{
             minHeight: 46,
@@ -203,7 +257,7 @@ export function RewardsScreen() {
         />
       ) : null}
 
-      {!isLoading && !error && popularRewards.length > 0 ? (
+      {!isLoading && !error && activeTab === "catalog" && popularRewards.length > 0 ? (
         <View style={{ gap: 9 }}>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
             <Text selectable style={{ color: "#141b2b", fontSize: 15, fontWeight: "900" }}>
@@ -230,7 +284,7 @@ export function RewardsScreen() {
         </View>
       ) : null}
 
-      {!isLoading && !error ? (
+      {!isLoading && !error && activeTab === "catalog" ? (
         <View style={{ gap: 10 }}>
           <Text selectable style={{ color: "#141b2b", fontSize: 15, fontWeight: "900" }}>
             Todas las opciones
@@ -248,7 +302,18 @@ export function RewardsScreen() {
         </View>
       ) : null}
 
-      {!isLoading && !error && filteredRewards.length === 0 ? (
+      {!isLoading && !error && activeTab === "redemptions" ? (
+        <View style={{ gap: 10 }}>
+          <Text selectable style={{ color: "#141b2b", fontSize: 15, fontWeight: "900" }}>
+            Mis Canjes ({redemptions.length})
+          </Text>
+          {filteredRedemptions.map((redemption, index) => (
+            <RedemptionCard key={redemption.id} index={index} redemption={redemption} />
+          ))}
+        </View>
+      ) : null}
+
+      {!isLoading && !error && ((activeTab === "catalog" && filteredRewards.length === 0) || (activeTab === "redemptions" && filteredRedemptions.length === 0)) ? (
         <View
           style={{
             minHeight: 190,
@@ -260,7 +325,9 @@ export function RewardsScreen() {
           }}
         >
           <Text selectable style={{ color: "#141b2b", fontWeight: "900", textAlign: "center" }}>
-            No encontramos recompensas con ese buscador.
+            {activeTab === "catalog" 
+              ? "No encontramos recompensas con ese buscador."
+              : query ? "No encontramos canjes con ese buscador." : "Aún no has canjeado ninguna recompensa."}
           </Text>
         </View>
       ) : null}
@@ -580,4 +647,46 @@ function getRewardCategory(reward: Reward) {
   }
 
   return "Recompensa";
+}
+
+function RedemptionCard({
+  index,
+  redemption,
+}: {
+  index: number;
+  redemption: RewardRedemption;
+}) {
+  const date = new Date(redemption.created_at);
+  const formattedDate = new Intl.DateTimeFormat("es-DO", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+
+  return (
+    <View
+      style={{
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#e0e7e3",
+        backgroundColor: "#ffffff",
+        boxShadow: "0 2px 8px rgba(20, 27, 43, 0.07)",
+        padding: 14,
+        gap: 10,
+        flexDirection: "row",
+        alignItems: "center",
+      }}
+    >
+      <CategoryIcon index={index} />
+      <View style={{ flex: 1, gap: 4 }}>
+        <Text selectable numberOfLines={1} style={{ color: "#607068", fontSize: 10, textTransform: "uppercase" }}>
+          {redemption.status === "completed" ? "Completado" : redemption.status === "pending" ? "Pendiente" : redemption.status} • {formattedDate}
+        </Text>
+        <Text selectable numberOfLines={2} style={{ color: "#141b2b", fontSize: 13, fontWeight: "900", lineHeight: 17 }}>
+          {redemption.title}
+        </Text>
+      </View>
+      <PointsBadge points={redemption.points_spent} />
+    </View>
+  );
 }
