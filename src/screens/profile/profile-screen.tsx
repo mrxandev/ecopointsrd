@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { Link } from "expo-router";
+import { Link, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
     ActivityIndicator,
@@ -163,15 +163,17 @@ export function ProfileScreen() {
     [token],
   );
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      void loadProfile();
-    }, 0);
+  useFocusEffect(
+    useCallback(() => {
+      const timeout = setTimeout(() => {
+        void loadProfile();
+      }, 0);
 
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [loadProfile]);
+      return () => {
+        clearTimeout(timeout);
+      };
+    }, [loadProfile])
+  );
 
   // Auto-clear message after 3 seconds
   useEffect(() => {

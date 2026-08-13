@@ -1,4 +1,5 @@
 import { Image } from "expo-image";
+import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -72,15 +73,17 @@ export function RewardsScreen() {
     [token],
   );
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      void loadRewards();
-    }, 0);
+  useFocusEffect(
+    useCallback(() => {
+      const timeout = setTimeout(() => {
+        void loadRewards();
+      }, 0);
 
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [loadRewards]);
+      return () => {
+        clearTimeout(timeout);
+      };
+    }, [loadRewards])
+  );
 
   const sortedRewards = useMemo(
     () => [...rewards].sort((a, b) => a.points_required - b.points_required),

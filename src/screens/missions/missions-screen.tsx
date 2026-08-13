@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { Link } from "expo-router";
+import { Link, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -69,15 +69,17 @@ export function MissionsScreen() {
     [token],
   );
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      void loadMissions();
-    }, 0);
+  useFocusEffect(
+    useCallback(() => {
+      const timeout = setTimeout(() => {
+        void loadMissions();
+      }, 0);
 
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [loadMissions]);
+      return () => {
+        clearTimeout(timeout);
+      };
+    }, [loadMissions])
+  );
 
   const registeredMissionIds = useMemo(
     () =>

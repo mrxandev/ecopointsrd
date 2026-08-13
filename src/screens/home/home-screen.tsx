@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { Link } from "expo-router";
+import { Link, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -18,7 +18,7 @@ import {
   getMissionImage,
   getMissionLocation,
 } from "@/screens/missions/mission-ui";
-import { getMyMissionRegistrations, getPublishedMissions, type Mission } from "@/services/mission-service";
+import { getMyMissionRegistrations, getPublishedMissions, type Mission, type MissionRegistration } from "@/services/mission-service";
 import { getMyProfile, type UserProfile } from "@/services/user-service";
 import { getLevelProgress } from "@/utils/level";
 
@@ -37,6 +37,7 @@ export function HomeScreen() {
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [missions, setMissions] = useState<Mission[]>([]);
+  const [registrations, setRegistrations] = useState<MissionRegistration[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -65,6 +66,7 @@ export function HomeScreen() {
 
         setProfile(nextProfile);
         setMissions(rawMissions.filter((m) => !completedIds.has(m.id)));
+        setRegistrations(nextRegistrations);
       } catch (loadError) {
         setError(
           loadError instanceof Error
@@ -79,19 +81,31 @@ export function HomeScreen() {
     [token],
   );
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      void loadHome();
-    }, 0);
+  useFocusEffect(
+    useCallback(() => {
+      const timeout = setTimeout(() => {
+        void loadHome();
+      }, 0);
 
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [loadHome]);
+      return () => {
+        clearTimeout(timeout);
+      };
+    }, [loadHome])
+  );
 
   const points = profile?.points ?? 0;
   const isSessionExpired = error?.name === "401" || error?.name === "403";
   const levelInfo = useMemo(() => getLevelProgress(points), [points]);
+
+  const registeredMissionIds = useMemo(
+    () =>
+      new Set(
+        registrations
+          .filter((registration) => registration.status !== "CANCELLED")
+          .map((registration) => registration.mission_id),
+      ),
+    [registrations],
+  );
 
   const recommendedMissions = useMemo(
     () =>
@@ -248,7 +262,7 @@ export function HomeScreen() {
                 contentContainerStyle={{ gap: 12 }}
               >
                 {recommendedMissions.map((mission) => (
-                  <RecommendedMissionCard key={mission.id} mission={mission} />
+                  <RecommendedMissionCard key={mission.id} mission={mission} isRegistered={registeredMissionIds.has(mission.id)} />
                 ))}
               </ScrollView>
             ) : (
@@ -503,7 +517,7 @@ function ImpactStats({ profile }: { profile: UserProfile | null }) {
   );
 }
 
-function RecommendedMissionCard({ mission }: { mission: Mission }) {
+function RecommendedMissionCard({ mission, isRegistered }: { mission: Mission; isRegistered?: boolean }) {
   const colorScheme = useColorScheme();
   const isDark = (colorScheme as string) === "dark";
 
@@ -535,13 +549,13 @@ function RecommendedMissionCard({ mission }: { mission: Mission }) {
               right: 8,
               top: 8,
               borderRadius: 999,
-              backgroundColor: "#dcfce7",
+              backgroundColor: isRegistered ? "#d4e3ff" : "#dcfce7",
               paddingHorizontal: 8,
               paddingVertical: 4,
             }}
           >
-            <Text style={{ color: "#166534", fontSize: 11, fontWeight: "900" }}>
-              +{mission.points_reward} pts
+            <Text style={{ color: isRegistered ? "#0f4883" : "#166534", fontSize: 11, fontWeight: "900" }}>
+              {isRegistered ? "Inscrito" : `+${mission.points_reward} pts`}
             </Text>
           </View>
         </View>
@@ -573,11 +587,11 @@ function RecommendedMissionCard({ mission }: { mission: Mission }) {
               alignItems: "center",
               justifyContent: "center",
               borderRadius: 8,
-              backgroundColor: "#0f5f43",
+              backgroundColor: isRegistered ? "#075985" : "#0f5f43",
             }}
           >
             <Text style={{ color: "#ffffff", fontSize: 11, fontWeight: "900" }}>
-              Unirse a la mision
+              {isRegistered ? "Ver avance" : "Unirse a la mision"}
             </Text>
           </View>
         </View>

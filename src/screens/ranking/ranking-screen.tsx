@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { Image } from "expo-image";
+import { useFocusEffect } from "expo-router";
 
 import { useAuth } from "@/hooks/use-auth";
 import { getUserRanking, type RankingUser } from "@/services/user-service";
@@ -59,15 +60,17 @@ export function RankingScreen() {
     [token],
   );
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      void loadRanking();
-    }, 0);
+  useFocusEffect(
+    useCallback(() => {
+      const timeout = setTimeout(() => {
+        void loadRanking();
+      }, 0);
 
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [loadRanking]);
+      return () => {
+        clearTimeout(timeout);
+      };
+    }, [loadRanking])
+  );
 
   const sortedRanking = useMemo(() => [...ranking].sort((a, b) => a.rank - b.rank), [ranking]);
   const podium = sortedRanking.slice(0, 3);
