@@ -1,3 +1,3 @@
-import { ProfileScreen } from "@/screens/profile/profile-screen";
+import { AgentProfileScreen } from "@/screens/profile/agent-profile-screen";
 
-export default ProfileScreen;
+export default AgentProfileScreen;

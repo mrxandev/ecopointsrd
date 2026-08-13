@@ -3,6 +3,7 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  BackHandler,
   Modal,
   Pressable,
   RefreshControl,
@@ -80,6 +81,23 @@ export default function ValidateScreen() {
   useEffect(() => {
     void loadMissions();
   }, [loadMissions]);
+
+  // Selecting a mission doesn't push a new route (it's local state), so the
+  // hardware back button has nothing to pop and would otherwise exit the app.
+  useEffect(() => {
+    if (!selectedMission) {
+      return;
+    }
+
+    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+      setSelectedMission(null);
+      setPendingScanData(null);
+      setValidationError(null);
+      return true;
+    });
+
+    return () => subscription.remove();
+  }, [selectedMission]);
 
   // Process QR Camera scan payload
   const processQrCodeData = async (rawCode: string) => {
